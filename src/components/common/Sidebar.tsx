@@ -1,8 +1,9 @@
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
 interface SidebarProps { }
 
-const menuItems = [
+const ownerMenuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/workers', label: 'Workers', icon: '👥' },
     { path: '/schedule', label: 'Schedule', icon: '📅' },
@@ -10,7 +11,18 @@ const menuItems = [
     { path: '/payroll', label: 'Payroll', icon: '💰' },
 ];
 
+const workerMenuItems = [
+    { path: '/dashboard', label: 'Dashboard', icon: '📊' },
+    { path: '/schedule', label: 'My Schedule', icon: '📅' },
+    { path: '/worklogs', label: 'My Work Logs', icon: '⏰' },
+    { path: '/payroll', label: 'My Payroll', icon: '💰' },
+];
+
 export const Sidebar = ({ }: SidebarProps) => {
+    const { user } = useAuth();
+
+    const menuItems = user?.role === 'OWNER' ? ownerMenuItems : workerMenuItems;
+
     return (
         <aside className="w-64 bg-gray-800 text-white min-h-screen p-4">
             <nav className="space-y-2">

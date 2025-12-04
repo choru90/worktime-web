@@ -1,25 +1,12 @@
-import { useState } from 'react';
+import { useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 
-interface AuthState {
-    isAuthenticated: boolean;
-    login: () => void;
-    logout: () => void;
-}
+export const useAuth = () => {
+    const context = useContext(AuthContext);
 
-export const useAuth = (): AuthState => {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-        return localStorage.getItem('isAuthenticated') === 'true';
-    });
+    if (!context) {
+        throw new Error('useAuth must be used within AuthProvider');
+    }
 
-    const login = () => {
-        localStorage.setItem('isAuthenticated', 'true');
-        setIsAuthenticated(true);
-    };
-
-    const logout = () => {
-        localStorage.removeItem('isAuthenticated');
-        setIsAuthenticated(false);
-    };
-
-    return { isAuthenticated, login, logout };
+    return context;
 };

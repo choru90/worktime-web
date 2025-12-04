@@ -6,7 +6,7 @@ import { SchedulePage } from '../pages/Schedule/SchedulePage';
 import { WorkLogsPage } from '../pages/WorkLogs/WorkLogsPage';
 import { PayrollPage } from '../pages/Payroll/PayrollPage';
 import { MainLayout } from '../layouts/MainLayout';
-import { PrivateRoute } from './PrivateRoute';
+import { PrivateRoute, PublicRoute } from './PrivateRoute';
 
 export const router = createBrowserRouter([
     {
@@ -15,7 +15,11 @@ export const router = createBrowserRouter([
     },
     {
         path: '/login',
-        element: <LoginPage />,
+        element: (
+            <PublicRoute>
+                <LoginPage />
+            </PublicRoute>
+        ),
     },
     {
         path: '/dashboard',
