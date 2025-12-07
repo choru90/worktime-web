@@ -1,14 +1,167 @@
+// src/pages/Workers/WorkersPage.tsx
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../../components/common/PageContainer';
+import { WorkerForm } from './WorkerForm';
+import apiClient from '../../lib/apiClient';
+import { Worker, WorkerCreateRequest } from '../../types/worker';
 
 export const WorkersPage = () => {
+    const [workers, setWorkers] = useState<Worker[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const navigate = useNavigate();
+
+    const fetchWorkers = async () => {
+        try {
+            setLoading(true);
+            const response = await apiClient.get<Worker[]>('/workers');
+            setWorkers(response.data);
+        } catch (error) {
+            console.error('Failed to fetch workers:', error);
+            alert('알바생 목록을 불러오는데 실패했습니다.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchWorkers();
+    }, []);
+
+    const handleCreate = async (values: WorkerCreateRequest) => {
+        try {
+            await apiClient.post('/workers', values);
+            setShowCreateModal(false);
+            fetchWorkers();
+        } catch (error) {
+            console.error('Failed to create worker:', error);
+            throw new Error('알바생 추가에 실패했습니다.');
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!window.confirm('정말 삭제하시겠습니까?')) {
+            return;
+        }
+
+        try {
+            await apiClient.delete(`/workers/${id}`);
+            fetchWorkers();
+        } catch (error) {
+            console.error('Failed to delete worker:', error);
+            alert('알바생 삭제에 실패했습니다.');
+        }
+    };
+
+    if (loading) {
+        return (
+            <PageContainer title="알바생 관리">
+                <div className="text-center py-12">Loading...</div>
+            </PageContainer>
+        );
+    }
+
     return (
-        <PageContainer title="Workers">
-            <div className="text-center py-12">
-                <h3 className="text-xl text-gray-600">Workers 리스트 화면 입니다</h3>
-                <p className="text-gray-500 mt-4">
-                    나중에 테이블이 추가될 예정입니다.
-                </p>
+        <PageContainer title="알바생 관리">
+            <div className="mb-4 flex justify-between items-center">
+                <p className="text-gray-600">총 {workers.length}명</p>
+                <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                    + 알바생 추가
+                </button>
             </div>
+
+            <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                이름
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                연락처
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                상태
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                현재 시급
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                액션
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                        {workers.map((worker) => (
+                            <tr key={worker.id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm font-medium text-gray-900">
+                                        {worker.name}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-500">{worker.phoneNumber}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${worker.active
+                                                ? 'bg-green-100 text-green-800'
+                                                : 'bg-gray-100 text-gray-800'
+                                            }`}
+                                    >
+                                        {worker.active ? 'ACTIVE' : 'INACTIVE'}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-900">
+                                        {worker.currentHourlyWage
+                                            ? `${worker.currentHourlyWage.toLocaleString()}원`
+                                            : '-'}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <button
+                                        onClick={() => navigate(`/workers/${worker.id}`)}
+                                        className="text-blue-600 hover:text-blue-900"
+                                    >
+                                        상세보기
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(worker.id)}
+                                        className="text-red-600 hover:text-red-900"
+                                    >
+                                        삭제
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+
+                {workers.length === 0 && (
+                    <div className="text-center py-12 text-gray-500">
+                        등록된 알바생이 없습니다.
+                    </div>
+                )}
+            </div>
+
+            {/* 생성 모달 */}
+            {showCreateModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                        <h3 className="text-lg font-semibold mb-4">알바생 추가</h3>
+                        <WorkerForm
+                            mode="create"
+                            onSubmit={handleCreate}
+                            onCancel={() => setShowCreateModal(false)}
+                        />
+                    </div>
+                </div>
+            )}
         </PageContainer>
     );
 };

@@ -1,7 +1,9 @@
+// src/app/router.tsx
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoginPage } from '../pages/Login/LoginPage';
 import { DashboardPage } from '../pages/Dashboard/DashboardPage';
 import { WorkersPage } from '../pages/Workers/WorkersPage';
+import { WorkerDetailPage } from '../pages/Workers/WorkerDetailPage';
 import { SchedulePage } from '../pages/Schedule/SchedulePage';
 import { WorkLogsPage } from '../pages/WorkLogs/WorkLogsPage';
 import { PayrollPage } from '../pages/Payroll/PayrollPage';
@@ -37,6 +39,16 @@ export const router = createBrowserRouter([
             <PrivateRoute>
                 <MainLayout>
                     <WorkersPage />
+                </MainLayout>
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: '/workers/:workerId',
+        element: (
+            <PrivateRoute>
+                <MainLayout>
+                    <WorkerDetailPage />
                 </MainLayout>
             </PrivateRoute>
         ),
