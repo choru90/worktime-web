@@ -7,6 +7,8 @@ import { SchedulePage } from '../pages/Schedule/SchedulePage';
 import { WorkLogsPage } from '../pages/WorkLogs/WorkLogsPage';
 import { MyWorkLogsPage } from '../pages/WorkLogs/MyWorkLogsPage';
 import { PayrollPage } from '../pages/Payroll/PayrollPage';
+import { WorkerPayrollDetailPage } from '../pages/Payroll/WorkerPayrollDetailPage';
+import { MyPayrollPage } from '../pages/Payroll/MyPayrollPage';
 import { MainLayout } from '../layouts/MainLayout';
 import { PrivateRoute, PublicRoute } from './PrivateRoute';
 
@@ -89,6 +91,26 @@ export const router = createBrowserRouter([
             <PrivateRoute>
                 <MainLayout>
                     <PayrollPage />
+                </MainLayout>
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: '/payroll/workers/:workerId',
+        element: (
+            <PrivateRoute>
+                <MainLayout>
+                    <WorkerPayrollDetailPage />
+                </MainLayout>
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: '/my/payroll',
+        element: (
+            <PrivateRoute>
+                <MainLayout>
+                    <MyPayrollPage />
                 </MainLayout>
             </PrivateRoute>
         ),
