@@ -1,4 +1,3 @@
-// src/app/router.tsx
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoginPage } from '../pages/Login/LoginPage';
 import { DashboardPage } from '../pages/Dashboard/DashboardPage';
@@ -6,6 +5,7 @@ import { WorkersPage } from '../pages/Workers/WorkersPage';
 import { WorkerDetailPage } from '../pages/Workers/WorkerDetailPage';
 import { SchedulePage } from '../pages/Schedule/SchedulePage';
 import { WorkLogsPage } from '../pages/WorkLogs/WorkLogsPage';
+import { MyWorkLogsPage } from '../pages/WorkLogs/MyWorkLogsPage';
 import { PayrollPage } from '../pages/Payroll/PayrollPage';
 import { MainLayout } from '../layouts/MainLayout';
 import { PrivateRoute, PublicRoute } from './PrivateRoute';
@@ -69,6 +69,16 @@ export const router = createBrowserRouter([
             <PrivateRoute>
                 <MainLayout>
                     <WorkLogsPage />
+                </MainLayout>
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: '/my/worklogs',
+        element: (
+            <PrivateRoute>
+                <MainLayout>
+                    <MyWorkLogsPage />
                 </MainLayout>
             </PrivateRoute>
         ),
