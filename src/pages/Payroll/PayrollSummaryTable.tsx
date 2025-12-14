@@ -42,7 +42,8 @@ export const PayrollSummaryTable = ({
         );
     }
 
-    const totalAmount = items.reduce((sum, item) => sum + item.totalAmount, 0);
+    const totalAmount = items.reduce((sum, item) => sum + (item.totalAmount || 0), 0);
+
 
     return (
         <div className="overflow-x-auto">
@@ -73,15 +74,15 @@ export const PayrollSummaryTable = ({
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">
-                                    {formatWorkTime(item.totalWorkMinutes)}
+                                    {formatWorkTime(item.totalWorkMinutes || 0)}
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                    ({item.totalWorkHours.toFixed(1)}시간)
+                                    ({(item.totalWorkHours || 0).toFixed(1)}시간)
                                 </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm font-semibold text-gray-900">
-                                    {formatAmount(item.totalAmount)}
+                                    {formatAmount(item.totalAmount || 0)}
                                 </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

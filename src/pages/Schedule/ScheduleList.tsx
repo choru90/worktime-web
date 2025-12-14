@@ -62,7 +62,10 @@ export const ScheduleList = ({
         );
     }
 
-    if (schedules.length === 0) {
+    // schedules가 배열이 아닌 경우 처리
+    const scheduleArray = Array.isArray(schedules) ? schedules : [];
+
+    if (scheduleArray.length === 0) {
         return (
             <div className="text-center py-12 text-gray-500">
                 해당 조건의 스케줄이 없습니다.
@@ -99,7 +102,7 @@ export const ScheduleList = ({
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                    {schedules.map((schedule) => (
+                    {scheduleArray.map((schedule) => (
                         <tr key={schedule.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">{schedule.date}</div>

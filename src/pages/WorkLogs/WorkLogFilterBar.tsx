@@ -77,10 +77,12 @@ export const WorkLogFilterBar = ({
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                     >
                         <option value="">전체</option>
-                        <option value="SUBMITTED">검수대기</option>
+                        <option value="ONGOING">근무중</option>
+                        <option value="COMPLETED">검수대기</option>
                         <option value="CONFIRMED">확정</option>
                         <option value="REJECTED">반려</option>
-                        <option value="IN_PROGRESS">근무중</option>
+                        <option value="NO_SHOW">미출근</option>
+                        <option value="MANUAL_ADJUSTED">수동조정</option>
                     </select>
                 </div>
             </div>

@@ -33,11 +33,11 @@ export const WorkLogList = ({
             string,
             { label: string; className: string }
         > = {
-            IN_PROGRESS: {
+            ONGOING: {
                 label: '근무중',
                 className: 'bg-blue-100 text-blue-800',
             },
-            SUBMITTED: {
+            COMPLETED: {
                 label: '검수대기',
                 className: 'bg-yellow-100 text-yellow-800',
             },
@@ -48,6 +48,14 @@ export const WorkLogList = ({
             REJECTED: {
                 label: '반려',
                 className: 'bg-red-100 text-red-800',
+            },
+            NO_SHOW: {
+                label: '미출근',
+                className: 'bg-gray-100 text-gray-800',
+            },
+            MANUAL_ADJUSTED: {
+                label: '수동조정',
+                className: 'bg-purple-100 text-purple-800',
             },
         };
 
@@ -66,7 +74,7 @@ export const WorkLogList = ({
     };
 
     const canConfirmOrReject = (status: string) => {
-        return status === 'SUBMITTED';
+        return status === 'COMPLETED';
     };
 
     if (isLoading) {

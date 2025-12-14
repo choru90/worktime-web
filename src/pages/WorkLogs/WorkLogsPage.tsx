@@ -16,7 +16,7 @@ export const WorkLogsPage = () => {
         workLogId?: string;
     }>({ open: false });
 
-    // 초기 날짜 범위: 오늘 기준 ±7일, 상태: SUBMITTED
+    // 초기 날짜 범위: 오늘 기준 ±7일, 상태: COMPLETED (검수 대기)
     const getInitialFilter = () => {
         const today = new Date();
         const fromDate = new Date(today);
@@ -27,7 +27,7 @@ export const WorkLogsPage = () => {
         return {
             fromDate: fromDate.toISOString().split('T')[0],
             toDate: toDate.toISOString().split('T')[0],
-            status: 'SUBMITTED',
+            status: 'COMPLETED',
         };
     };
 
@@ -37,8 +37,8 @@ export const WorkLogsPage = () => {
         try {
             setLoading(true);
             const params: any = {
-                fromDate: filter.fromDate,
-                toDate: filter.toDate,
+                from: new Date(filter.fromDate).toISOString(),
+                to: new Date(filter.toDate + 'T23:59:59').toISOString(),
             };
 
             if (filter.workerId) {
@@ -48,7 +48,7 @@ export const WorkLogsPage = () => {
                 params.status = filter.status;
             }
 
-            const response = await apiClient.get<WorkLog[]>('/worklogs', { params });
+            const response = await apiClient.get<WorkLog[]>('/work-logs', { params });
             setWorkLogs(response.data);
         } catch (error) {
             console.error('Failed to fetch work logs:', error);
@@ -81,7 +81,7 @@ export const WorkLogsPage = () => {
         }
 
         try {
-            await apiClient.post(`/worklogs/${workLogId}/confirm`);
+            await apiClient.post(`/work-logs/${workLogId}/confirm`);
             fetchWorkLogs();
         } catch (error) {
             console.error('Failed to confirm work log:', error);
@@ -97,7 +97,7 @@ export const WorkLogsPage = () => {
         if (!rejectModal.workLogId) return;
 
         try {
-            await apiClient.post(`/worklogs/${rejectModal.workLogId}/reject`, {
+            await apiClient.post(`/work-logs/${rejectModal.workLogId}/reject`, {
                 reason,
             });
             setRejectModal({ open: false });

@@ -18,13 +18,11 @@ export interface WageContract {
 export interface WorkerCreateRequest {
     name: string;
     phoneNumber: string;
-    active: boolean;
 }
 
 export interface WorkerUpdateRequest {
     name: string;
     phoneNumber: string;
-    // active: boolean;
 }
 
 export interface WageContractCreateRequest {

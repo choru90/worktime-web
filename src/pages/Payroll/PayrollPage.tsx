@@ -34,14 +34,25 @@ export const PayrollPage = () => {
                 params.workerId = filter.workerId;
             }
 
-            const response = await apiClient.get<PayrollSummary[]>(
+            const response = await apiClient.get<any[]>(
                 '/payroll/owner/monthly',
                 { params }
             );
-            setPayrollData(response.data);
+
+            // 백엔드 응답을 프론트엔드 형식으로 변환
+            const transformedData: PayrollSummary[] = response.data.map((item: any) => ({
+                workerId: item.workerId,
+                workerName: item.workerName,
+                totalWorkMinutes: Math.round((item.totalHours || 0) * 60),
+                totalWorkHours: item.totalHours || 0,
+                totalAmount: item.totalPay || 0,
+            }));
+
+            setPayrollData(transformedData);
         } catch (error) {
             console.error('Failed to fetch payroll data:', error);
             alert('급여 데이터를 불러오는데 실패했습니다.');
+            setPayrollData([]); // 에러 시 빈 배열로 설정
         } finally {
             setLoading(false);
         }

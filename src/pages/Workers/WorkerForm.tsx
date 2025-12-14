@@ -1,13 +1,13 @@
-// src/pages/Workers/WorkerForm.tsx
 import { useState, FormEvent } from 'react';
 import { WorkerCreateRequest, WorkerUpdateRequest } from '../../types/worker';
 
 interface WorkerFormProps {
     mode: 'create' | 'edit';
-    initialValues?: {
+    initialValues
+
+    ?: {
         name: string;
         phoneNumber: string;
-        active: boolean;
     };
     onSubmit: (values: WorkerCreateRequest | WorkerUpdateRequest) => Promise<void>;
     onCancel: () => void;
@@ -15,7 +15,7 @@ interface WorkerFormProps {
 
 export const WorkerForm = ({
     mode,
-    initialValues = { name: '', phoneNumber: '', active: true },
+    initialValues = { name: '', phoneNumber: '' },
     onSubmit,
     onCancel,
 }: WorkerFormProps) => {
@@ -80,26 +80,9 @@ export const WorkerForm = ({
                         setFormData({ ...formData, phoneNumber: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="010-1234-5678"
+                    placeholder="01012345678"
                     disabled={loading}
                 />
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    상태 *
-                </label>
-                <select
-                    value={formData.active ? 'true' : 'false'}
-                    onChange={(e) =>
-                        setFormData({ ...formData, active: e.target.value === 'true' })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    disabled={loading}
-                >
-                    <option value="true">ACTIVE</option>
-                    <option value="false">INACTIVE</option>
-                </select>
             </div>
 
             <div className="flex gap-2 justify-end pt-4">

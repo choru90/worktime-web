@@ -1,4 +1,3 @@
-// src/pages/Workers/WorkerDetailPage.tsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageContainer } from '../../components/common/PageContainer';
@@ -147,7 +146,6 @@ export const WorkerDetailPage = () => {
                             initialValues={{
                                 name: worker.name,
                                 phoneNumber: worker.phoneNumber,
-                                active: worker.active,
                             }}
                             onSubmit={handleUpdate}
                             onCancel={() => setShowEditModal(false)}

@@ -44,13 +44,31 @@ export const SchedulePage = () => {
                 params.status = filter.status;
             }
 
-            const response = await apiClient.get<Schedule[]>('/schedules', {
+            const response = await apiClient.get<any>('/schedules', {
                 params,
             });
-            setSchedules(response.data);
+
+            console.log('API Response:', response.data);
+
+            // API 응답 형식에 따라 데이터 추출
+            let schedulesData: Schedule[];
+            if (Array.isArray(response.data)) {
+                schedulesData = response.data;
+            } else if (response.data?.content && Array.isArray(response.data.content)) {
+                // 페이징된 응답의 경우
+                schedulesData = response.data.content;
+            } else if (response.data?.data && Array.isArray(response.data.data)) {
+                schedulesData = response.data.data;
+            } else {
+                console.warn('Unexpected API response format:', response.data);
+                schedulesData = [];
+            }
+
+            setSchedules(schedulesData);
         } catch (error) {
             console.error('Failed to fetch schedules:', error);
             alert('스케줄 목록을 불러오는데 실패했습니다.');
+            setSchedules([]); // 에러 발생 시 빈 배열로 설정
         } finally {
             setLoading(false);
         }

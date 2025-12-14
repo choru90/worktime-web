@@ -6,7 +6,7 @@ export interface WorkLog {
     startAt: string;
     endAt: string | null;
     workMinutes: number;
-    status: 'IN_PROGRESS' | 'SUBMITTED' | 'CONFIRMED' | 'REJECTED';
+    status: 'ONGOING' | 'COMPLETED' | 'CONFIRMED' | 'REJECTED' | 'NO_SHOW' | 'MANUAL_ADJUSTED';
 }
 
 export interface WorkLogFilter {
