@@ -17,6 +17,27 @@ export interface TopWorkersParams {
     sort?: 'WAGE_DESC' | 'MINUTES_DESC' | 'SHIFTS_DESC';
 }
 
+export interface TodayKpi {
+    scheduledCount: number;
+    checkedInCount: number;
+    notCheckedInCount: number;
+    notCheckedOutCount: number;
+    totalWorkMinutes: number;
+}
+
+export interface MonthKpi {
+    accruedWage: number;
+    forecastWage: number;
+}
+
+export interface DashboardSummaryResponse {
+    date: string;
+    timezone: string;
+    today: TodayKpi;
+    month: MonthKpi;
+    actionNeededCount: number;
+}
+
 export const dashboardApi = {
     getSummary: (date?: string) => {
         return apiClient.get('/owner/dashboard/summary', { params: { date } });

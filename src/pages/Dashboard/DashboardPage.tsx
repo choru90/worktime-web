@@ -42,7 +42,7 @@ export const DashboardPage = () => {
                     <div className="lg:col-span-2">
                         <DashboardSummarySection date={currentDate} />
                     </div>
-                    <div className="lg:col-span-1">
+                    <div className="lg:col-span-1" id="dashboard-actions">
                         <DashboardActionsSection date={currentDate} />
                     </div>
                 </div>
@@ -50,7 +50,9 @@ export const DashboardPage = () => {
                 {/* 2. Middle Section: Attendance & Schedules */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <DashboardAttendanceSection date={currentDate} />
-                    <DashboardTodaySchedulesSection date={currentDate} />
+                    <div id="today-schedules">
+                        <DashboardTodaySchedulesSection date={currentDate} />
+                    </div>
                 </div>
 
                 {/* 3. Bottom Section: Top Workers */}
