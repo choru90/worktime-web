@@ -115,4 +115,25 @@ export const router = createBrowserRouter([
             </PrivateRoute>
         ),
     },
+    {
+        path: '/my/payroll',
+        element: (
+            <PrivateRoute>
+                <MainLayout>
+                    <MyPayrollPage />
+                </MainLayout>
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: '/owner/dashboard',
+        element: (
+            <PrivateRoute>
+                <MainLayout>
+                    <DashboardPage />
+                </MainLayout>
+            </PrivateRoute>
+        ),
+    },
 ]);
+
