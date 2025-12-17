@@ -38,6 +38,20 @@ export interface DashboardSummaryResponse {
     actionNeededCount: number;
 }
 
+export interface TodayScheduleItem {
+    id: string;
+    workerName: string;
+    workerId: string;
+    startTime: string; // HH:mm or ISO
+    endTime: string;   // HH:mm or ISO
+    status: 'SCHEDULED' | 'ONGOING' | 'COMPLETED' | 'ABSENT' | 'LATE';
+    flags: ('LATE' | 'NEEDS_CHECKIN' | 'NEEDS_CHECKOUT')[];
+}
+
+export interface TodayScheduleListResponse {
+    items: TodayScheduleItem[];
+}
+
 export const dashboardApi = {
     getSummary: (date?: string) => {
         return apiClient.get('/owner/dashboard/summary', { params: { date } });
