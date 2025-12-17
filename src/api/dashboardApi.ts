@@ -77,6 +77,28 @@ export interface AttendanceSummaryResponse {
     exceptions: AttendanceExceptionItem[];
 }
 
+export interface ActionTarget {
+    type: string;
+    id: string;
+    deepLink?: string;
+}
+
+export interface ActionItem {
+    id: string;
+    type: string; // 'PENDING_SCHEDULE_APPROVAL', 'MISSING_CHECKIN', 'MISSING_CHECKOUT'
+    title: string;
+    message: string;
+    priority: 'HIGH' | 'MEDIUM' | 'LOW';
+    target: ActionTarget;
+    createdAt: string;
+    isDismissible: boolean;
+}
+
+export interface ActionListResponse {
+    items: ActionItem[];
+    totalCount: number;
+}
+
 export const dashboardApi = {
     getSummary: (date?: string) => {
         return apiClient.get('/owner/dashboard/summary', { params: { date } });
