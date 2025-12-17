@@ -52,6 +52,31 @@ export interface TodayScheduleListResponse {
     items: TodayScheduleItem[];
 }
 
+export interface AttendanceCounts {
+    scheduledCount: number;
+    checkedInCount: number;
+    notCheckedInCount: number;
+    notCheckedOutCount: number;
+}
+
+export interface AttendanceExceptionItem {
+    type: 'SCHEDULE_EXISTS_BUT_NO_CHECKIN' | 'CHECKIN_EXISTS_BUT_NO_CHECKOUT' | 'LOG_EXISTS_BUT_NO_SCHEDULE';
+    scheduleId?: string;
+    workLogId?: string;
+    workerId: string;
+    workerName: string;
+    scheduledStartAt?: string;
+    scheduledEndAt?: string;
+    checkedInAt?: string;
+    checkedOutAt?: string;
+}
+
+export interface AttendanceSummaryResponse {
+    date: string;
+    summary: AttendanceCounts;
+    exceptions: AttendanceExceptionItem[];
+}
+
 export const dashboardApi = {
     getSummary: (date?: string) => {
         return apiClient.get('/owner/dashboard/summary', { params: { date } });
