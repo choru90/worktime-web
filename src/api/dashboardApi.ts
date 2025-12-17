@@ -99,6 +99,37 @@ export interface ActionListResponse {
     totalCount: number;
 }
 
+export interface WorkerInfo {
+    workerId: string;
+    name: string;
+    pictureUrl?: string;
+}
+
+export interface WorkerStats {
+    completedShifts: number;
+    totalWorkMinutes: number;
+    accruedWage: number;
+}
+
+export interface TopWorkerItem {
+    rank: number;
+    worker: WorkerInfo;
+    stats: WorkerStats;
+    badges: string[]; // 'TOP_WAGE', 'TOP_MINUTES' etc.
+}
+
+export interface DateRangeDto {
+    from: string;
+    to: string;
+    days: number;
+}
+
+export interface TopWorkersResponse {
+    timezone: string;
+    range: DateRangeDto;
+    items: TopWorkerItem[];
+}
+
 export const dashboardApi = {
     getSummary: (date?: string) => {
         return apiClient.get('/owner/dashboard/summary', { params: { date } });
