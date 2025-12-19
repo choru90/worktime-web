@@ -3,6 +3,7 @@ import apiClient from '../lib/apiClient';
 
 interface User {
     userId: string;
+    ownerId?: string;
     workerId?: string;
     role: 'OWNER' | 'WORKER';
     email?: string;
@@ -12,6 +13,7 @@ interface LoginResponse {
     accessToken: string;
     tokenType: string;
     userId: string;
+    ownerId?: string;
     workerId?: string;
     role: 'OWNER' | 'WORKER';
 }
@@ -61,7 +63,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 password,
             });
 
-            const { accessToken, userId, workerId, role } = response.data;
+            const { accessToken, userId, ownerId, workerId, role } = response.data;
 
             // 토큰 저장
             localStorage.setItem('accessToken', accessToken);
@@ -69,6 +71,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             // 사용자 정보 저장
             const userData: User = {
                 userId,
+                ownerId,
                 workerId,
                 role,
                 email,

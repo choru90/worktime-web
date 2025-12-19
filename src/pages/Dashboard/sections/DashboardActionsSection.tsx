@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { dashboardApi, ActionItem } from '../../../api/dashboardApi';
 import { Loading } from '../../../components/common/Loading';
 import { ErrorState } from '../../../components/common/ErrorState';
-import { EmptyState } from '../../../components/common/EmptyState';
 import { useNavigate } from 'react-router-dom';
 
 interface Props {
