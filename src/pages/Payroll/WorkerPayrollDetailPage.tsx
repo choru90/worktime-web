@@ -75,7 +75,7 @@ export const WorkerPayrollDetailPage = () => {
             <div className="mb-6">
                 <button
                     onClick={() => navigate('/payroll')}
-                    className="text-blue-600 hover:text-blue-800 mb-4"
+                    className="text-gray-700 hover:text-gray-900 font-medium mb-4"
                 >
                     ← 목록으로 돌아가기
                 </button>
@@ -100,7 +100,7 @@ export const WorkerPayrollDetailPage = () => {
                         </div>
                         <div>
                             <label className="text-sm text-gray-500">총 급여</label>
-                            <p className="text-xl font-bold text-blue-600">
+                            <p className="text-xl font-bold text-gray-900">
                                 {formatAmount(detail.totalAmount)}
                             </p>
                         </div>

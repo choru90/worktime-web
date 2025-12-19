@@ -29,7 +29,7 @@ export const DashboardPage = () => {
                         type="date"
                         value={currentDate}
                         onChange={handleDateChange}
-                        className="border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        className="border-gray-300 rounded-md shadow-sm focus:border-gray-900 focus:ring-gray-900 sm:text-sm"
                     />
                 </div>
             </div>

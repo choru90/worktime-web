@@ -65,7 +65,7 @@ export const DashboardSummarySection: React.FC<Props> = ({ date }) => {
                     <span className="text-2xl font-bold text-gray-900">{today.scheduledCount}명</span>
                 </div>
                 <div className="mt-2 text-xs text-gray-500 flex gap-2">
-                    <span className="text-blue-600">출근 {today.checkedInCount}</span>
+                    <span className="text-emerald-600">출근 {today.checkedInCount}</span>
                     <span className="text-red-500">미출근 {today.notCheckedInCount}</span>
                 </div>
             </div>

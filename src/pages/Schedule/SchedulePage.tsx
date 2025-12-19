@@ -130,7 +130,7 @@ export const SchedulePage = () => {
                 <p className="text-gray-600">총 {schedules.length}개</p>
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                    className="bg-gray-900 hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-lg transition-colors"
                 >
                     + 스케줄 제안
                 </button>

@@ -110,7 +110,7 @@ export const DashboardActionsSection: React.FC<Props> = ({ date }) => {
                     </button>
                     <button
                         onClick={() => setFilter('PENDING')}
-                        className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${filter === 'PENDING' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                        className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${filter === 'PENDING' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
                         승인 대기
@@ -153,7 +153,7 @@ export const DashboardActionsSection: React.FC<Props> = ({ date }) => {
                             <div
                                 key={item.id}
                                 onClick={() => handleActionClick(item)}
-                                className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm hover:shadow-md cursor-pointer transition-all hover:border-blue-100 group"
+                                className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm hover:shadow-md cursor-pointer transition-all hover:border-gray-300 group"
                             >
                                 <div className="flex items-start justify-between mb-1">
                                     <div className="flex items-center">
@@ -166,7 +166,7 @@ export const DashboardActionsSection: React.FC<Props> = ({ date }) => {
                                         {formatTime(item.createdAt)}
                                     </span>
                                 </div>
-                                <h3 className="text-gray-800 font-bold mb-1 group-hover:text-blue-600 transition-colors">
+                                <h3 className="text-gray-800 font-bold mb-1 group-hover:text-gray-900 transition-colors">
                                     {item.title}
                                 </h3>
                                 <p className="text-sm text-gray-600 line-clamp-2">

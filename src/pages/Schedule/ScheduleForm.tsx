@@ -86,7 +86,7 @@ export const ScheduleForm = ({
                     onChange={(e) =>
                         setFormData({ ...formData, workerId: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                     disabled={loading}
                     required
                 >
@@ -109,7 +109,7 @@ export const ScheduleForm = ({
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                     disabled={loading}
                     required
                 />
@@ -126,7 +126,7 @@ export const ScheduleForm = ({
                         onChange={(e) =>
                             setFormData({ ...formData, startTime: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                         disabled={loading}
                         required
                     />
@@ -142,7 +142,7 @@ export const ScheduleForm = ({
                         onChange={(e) =>
                             setFormData({ ...formData, endTime: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                         disabled={loading}
                         required
                     />
@@ -156,7 +156,7 @@ export const ScheduleForm = ({
                 <textarea
                     value={formData.memo}
                     onChange={(e) => setFormData({ ...formData, memo: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                     rows={3}
                     placeholder="추가 메모 (선택사항)"
                     disabled={loading}
@@ -174,7 +174,7 @@ export const ScheduleForm = ({
                 </button>
                 <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:bg-blue-300"
+                    className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors disabled:bg-gray-400"
                     disabled={loading}
                 >
                     {loading ? '생성 중...' : '스케줄 제안'}

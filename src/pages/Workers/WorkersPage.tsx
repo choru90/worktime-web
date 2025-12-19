@@ -68,7 +68,7 @@ export const WorkersPage = () => {
                 <p className="text-gray-600">총 {workers.length}명</p>
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                    className="bg-gray-900 hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-lg transition-colors"
                 >
                     + 알바생 추가
                 </button>
@@ -109,8 +109,8 @@ export const WorkersPage = () => {
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span
                                         className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${worker.active
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-gray-100 text-gray-800'
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-gray-100 text-gray-800'
                                             }`}
                                     >
                                         {worker.active ? 'ACTIVE' : 'INACTIVE'}
@@ -126,7 +126,7 @@ export const WorkersPage = () => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                     <button
                                         onClick={() => navigate(`/workers/${worker.id}`)}
-                                        className="text-blue-600 hover:text-blue-900"
+                                        className="text-gray-700 hover:text-gray-900 font-medium"
                                     >
                                         상세보기
                                     </button>

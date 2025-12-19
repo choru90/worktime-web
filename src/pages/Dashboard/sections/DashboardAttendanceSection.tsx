@@ -72,8 +72,8 @@ export const DashboardAttendanceSection: React.FC<Props> = ({ date }) => {
                         <span className="text-lg font-bold text-gray-800">{summary.scheduledCount}</span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-gray-500 text-xs text-blue-600">출근</span>
-                        <span className="text-lg font-bold text-blue-600">{summary.checkedInCount}</span>
+                        <span className="text-gray-500 text-xs text-emerald-600">출근</span>
+                        <span className="text-lg font-bold text-emerald-600">{summary.checkedInCount}</span>
                     </div>
                     <div className="flex flex-col">
                         <span className="text-gray-500 text-xs text-red-500">미출근</span>

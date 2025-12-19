@@ -70,7 +70,7 @@ export const WageContractForm = ({
                         onChange={(e) =>
                             setFormData({ ...formData, hourlyWage: Number(e.target.value) })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                         placeholder="10000"
                         disabled={loading}
                         min="0"
@@ -87,7 +87,7 @@ export const WageContractForm = ({
                         onChange={(e) =>
                             setFormData({ ...formData, effectiveFrom: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                         disabled={loading}
                     />
                 </div>
@@ -96,7 +96,7 @@ export const WageContractForm = ({
             <div className="flex justify-end">
                 <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:bg-blue-300"
+                    className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors disabled:bg-gray-400"
                     disabled={loading}
                 >
                     {loading ? '추가 중...' : '시급 계약 추가'}

@@ -82,7 +82,7 @@ export const WorkerDetailPage = () => {
                     <h3 className="text-lg font-semibold">기본 정보</h3>
                     <button
                         onClick={() => setShowEditModal(true)}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-gray-700 hover:text-gray-900 font-medium"
                     >
                         수정
                     </button>
@@ -102,8 +102,8 @@ export const WorkerDetailPage = () => {
                         <p className="text-base font-medium">
                             <span
                                 className={`px-2 py-1 text-xs rounded-full ${worker.active
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-gray-100 text-gray-800'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-gray-100 text-gray-800'
                                     }`}
                             >
                                 {worker.active ? 'ACTIVE' : 'INACTIVE'}

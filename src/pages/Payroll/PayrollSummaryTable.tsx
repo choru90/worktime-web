@@ -92,7 +92,7 @@ export const PayrollSummaryTable = ({
                                             `/payroll/workers/${item.workerId}?year=${year}&month=${month}`
                                         )
                                     }
-                                    className="text-blue-600 hover:text-blue-900"
+                                    className="text-gray-700 hover:text-gray-900 font-medium"
                                 >
                                     상세보기
                                 </button>

@@ -16,23 +16,23 @@ export const Header = ({ }: HeaderProps) => {
     };
 
     return (
-        <header className="bg-blue-600 text-white h-16 flex items-center justify-between px-6 shadow-md">
-            <h1 className="text-xl font-bold">Worktime - 아르바이트 관리</h1>
+        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6">
+            <h1 className="text-lg font-semibold text-gray-900">아르바이트 관리</h1>
 
             <div className="flex items-center gap-4">
                 {user && (
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm bg-blue-700 px-3 py-1 rounded-full">
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-full font-medium">
                             {getRoleLabel(user.role)}
                         </span>
                         {user.email && (
-                            <span className="text-sm">{user.email}</span>
+                            <span className="text-sm text-gray-600">{user.email}</span>
                         )}
                     </div>
                 )}
                 <button
                     onClick={handleLogout}
-                    className="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded transition-colors"
+                    className="bg-gray-900 hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-lg transition-colors"
                 >
                     로그아웃
                 </button>
@@ -40,3 +40,4 @@ export const Header = ({ }: HeaderProps) => {
         </header>
     );
 };
+
