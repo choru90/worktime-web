@@ -14,7 +14,7 @@ export const WageContractForm = ({
 }: WageContractFormProps) => {
     const [formData, setFormData] = useState<WageContractCreateRequest>({
         hourlyWage: 0,
-        effectiveFrom: new Date().toISOString().split('T')[0],
+        startDate: new Date().toISOString().split('T')[0],
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -27,7 +27,7 @@ export const WageContractForm = ({
             setError('시급을 입력해주세요.');
             return;
         }
-        if (!formData.effectiveFrom) {
+        if (!formData.startDate) {
             setError('적용 시작일을 입력해주세요.');
             return;
         }
@@ -39,7 +39,7 @@ export const WageContractForm = ({
             // 폼 초기화
             setFormData({
                 hourlyWage: 0,
-                effectiveFrom: new Date().toISOString().split('T')[0],
+                startDate: new Date().toISOString().split('T')[0],
             });
 
             onCreated();
@@ -83,9 +83,9 @@ export const WageContractForm = ({
                     </label>
                     <input
                         type="date"
-                        value={formData.effectiveFrom}
+                        value={formData.startDate}
                         onChange={(e) =>
-                            setFormData({ ...formData, effectiveFrom: e.target.value })
+                            setFormData({ ...formData, startDate: e.target.value })
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                         disabled={loading}

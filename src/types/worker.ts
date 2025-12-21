@@ -27,5 +27,6 @@ export interface WorkerUpdateRequest {
 
 export interface WageContractCreateRequest {
     hourlyWage: number;
-    effectiveFrom: string;
+    startDate: string;
+    endDate?: string | null;
 }
