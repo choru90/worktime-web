@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoginPage } from '../pages/Login/LoginPage';
 import { SignupPage } from '../pages/Signup/SignupPage';
+import { WorkerSignupPage } from '../pages/Signup/WorkerSignupPage';
 import { DashboardPage } from '../pages/Dashboard/DashboardPage';
 import { WorkersPage } from '../pages/Workers/WorkersPage';
 import { WorkerDetailPage } from '../pages/Workers/WorkerDetailPage';
@@ -31,6 +32,14 @@ export const router = createBrowserRouter([
         element: (
             <PublicRoute>
                 <SignupPage />
+            </PublicRoute>
+        ),
+    },
+    {
+        path: '/signup/worker',
+        element: (
+            <PublicRoute>
+                <WorkerSignupPage />
             </PublicRoute>
         ),
     },

@@ -4,6 +4,7 @@ import { PageContainer } from '../../components/common/PageContainer';
 import { WorkerForm } from './WorkerForm';
 import { WageContractList } from './WageContractList';
 import { WageContractForm } from './WageContractForm';
+import { InviteCodeSection } from './InviteCodeSection';
 import apiClient from '../../lib/apiClient';
 import { Worker, WageContract, WorkerUpdateRequest } from '../../types/worker';
 
@@ -121,6 +122,14 @@ export const WorkerDetailPage = () => {
                 </div>
             </div>
 
+            {/* 알바생 계정 연결 */}
+            <div className="mb-6">
+                <InviteCodeSection
+                    workerId={workerId!}
+                    hasAccount={worker.hasAccount ?? false}
+                />
+            </div>
+
             {/* 시급 계약 섹션 */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
                 <h3 className="text-lg font-semibold mb-4">시급 계약 내역</h3>
@@ -156,3 +165,4 @@ export const WorkerDetailPage = () => {
         </PageContainer>
     );
 };
+
