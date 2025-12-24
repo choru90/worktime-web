@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { PayrollSummary } from '../../types/payroll';
 
 interface PayrollSummaryTableProps {
@@ -26,6 +26,11 @@ export const PayrollSummaryTable = ({
         return amount.toLocaleString() + '원';
     };
 
+    // 시급 미설정 여부 체크
+    const isWageNotSet = (item: PayrollSummary) => {
+        return (item.totalWorkMinutes || 0) > 0 && (item.totalAmount || 0) === 0;
+    };
+
     if (isLoading) {
         return (
             <div className="text-center py-12">
@@ -43,6 +48,7 @@ export const PayrollSummaryTable = ({
     }
 
     const totalAmount = items.reduce((sum, item) => sum + (item.totalAmount || 0), 0);
+    const totalMinutes = items.reduce((sum, item) => sum + (item.totalWorkMinutes || 0), 0);
 
 
     return (
@@ -68,9 +74,12 @@ export const PayrollSummaryTable = ({
                     {items.map((item) => (
                         <tr key={item.workerId} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">
+                                <Link
+                                    to={`/workers/${item.workerId}`}
+                                    className="text-sm font-medium text-gray-900 hover:text-blue-600 hover:underline"
+                                >
                                     {item.workerName}
-                                </div>
+                                </Link>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">
@@ -81,9 +90,23 @@ export const PayrollSummaryTable = ({
                                 </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-semibold text-gray-900">
-                                    {formatAmount(item.totalAmount || 0)}
-                                </div>
+                                {isWageNotSet(item) ? (
+                                    <div>
+                                        <span className="text-sm text-orange-600 font-medium">
+                                            ⚠️ 시급 미설정
+                                        </span>
+                                        <Link
+                                            to={`/workers/${item.workerId}`}
+                                            className="block text-xs text-blue-600 hover:underline"
+                                        >
+                                            시급 설정하기
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <div className="text-sm font-semibold text-gray-900">
+                                        {formatAmount(item.totalAmount || 0)}
+                                    </div>
+                                )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <button
@@ -105,7 +128,9 @@ export const PayrollSummaryTable = ({
                         <td className="px-6 py-3 text-sm font-bold text-gray-900">
                             합계
                         </td>
-                        <td className="px-6 py-3"></td>
+                        <td className="px-6 py-3 text-sm text-gray-700">
+                            {formatWorkTime(totalMinutes)}
+                        </td>
                         <td className="px-6 py-3 text-sm font-bold text-gray-900">
                             {formatAmount(totalAmount)}
                         </td>
@@ -116,3 +141,4 @@ export const PayrollSummaryTable = ({
         </div>
     );
 };
+
