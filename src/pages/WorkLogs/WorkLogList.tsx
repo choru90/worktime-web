@@ -125,7 +125,9 @@ export const WorkLogList = ({
                     {workLogs.map((log) => (
                         <tr key={log.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">{log.date}</div>
+                                <div className="text-sm text-gray-900">
+                                    {new Date(log.clockInAt).toLocaleDateString('ko-KR')}
+                                </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm font-medium text-gray-900">
@@ -134,17 +136,17 @@ export const WorkLogList = ({
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">
-                                    {formatTime(log.startAt)}
+                                    {formatTime(log.clockInAt)}
                                 </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">
-                                    {formatTime(log.endAt)}
+                                    {formatTime(log.clockOutAt)}
                                 </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">
-                                    {formatWorkTime(log.workMinutes)}
+                                    {log.durationMinutes ? formatWorkTime(log.durationMinutes) : '-'}
                                 </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">

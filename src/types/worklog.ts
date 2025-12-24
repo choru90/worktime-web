@@ -2,11 +2,13 @@ export interface WorkLog {
     id: string;
     workerId: string;
     workerName: string;
-    date: string;
-    startAt: string;
-    endAt: string | null;
-    workMinutes: number;
+    scheduleId: string | null;
+    clockInAt: string;
+    clockOutAt: string | null;
     status: 'ONGOING' | 'COMPLETED' | 'CONFIRMED' | 'REJECTED' | 'NO_SHOW' | 'MANUAL_ADJUSTED';
+    durationMinutes: number | null;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface WorkLogFilter {

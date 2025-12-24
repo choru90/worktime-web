@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PageContainer } from '../../components/common/PageContainer';
 import { WorkLogList } from './WorkLogList';
 import apiClient from '../../lib/apiClient';
@@ -8,7 +8,9 @@ import { useAuth } from '../../hooks/useAuth';
 export const MyWorkLogsPage = () => {
     const { user } = useAuth();
     const [workLogs, setWorkLogs] = useState<WorkLog[]>([]);
+    const [currentWorkLog, setCurrentWorkLog] = useState<WorkLog | null>(null);
     const [loading, setLoading] = useState(true);
+    const [clockLoading, setClockLoading] = useState(false);
     const [dateFilter, setDateFilter] = useState({
         fromDate: '',
         toDate: '',
@@ -26,7 +28,16 @@ export const MyWorkLogsPage = () => {
         });
     }, []);
 
-    const fetchMyWorkLogs = async () => {
+    const fetchCurrentWorkLog = useCallback(async () => {
+        try {
+            const response = await apiClient.get<WorkLog | null>('/worklogs/my/current');
+            setCurrentWorkLog(response.data);
+        } catch (error) {
+            console.error('Failed to fetch current work log:', error);
+        }
+    }, []);
+
+    const fetchMyWorkLogs = useCallback(async () => {
         if (!dateFilter.fromDate || !dateFilter.toDate) return;
 
         try {
@@ -46,13 +57,56 @@ export const MyWorkLogsPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [dateFilter]);
+
+    useEffect(() => {
+        fetchCurrentWorkLog();
+    }, [fetchCurrentWorkLog]);
 
     useEffect(() => {
         if (dateFilter.fromDate && dateFilter.toDate) {
             fetchMyWorkLogs();
         }
-    }, [dateFilter]);
+    }, [dateFilter, fetchMyWorkLogs]);
+
+    const handleClockIn = async () => {
+        try {
+            setClockLoading(true);
+            await apiClient.post('/worklogs/my/clock-in');
+            alert('출근 처리되었습니다!');
+            fetchCurrentWorkLog();
+            fetchMyWorkLogs();
+        } catch (error: any) {
+            console.error('Failed to clock in:', error);
+            const message = error.response?.data?.message || '출근 처리에 실패했습니다.';
+            alert(message);
+        } finally {
+            setClockLoading(false);
+        }
+    };
+
+    const handleClockOut = async () => {
+        try {
+            setClockLoading(true);
+            await apiClient.post('/worklogs/my/clock-out');
+            alert('퇴근 처리되었습니다!');
+            fetchCurrentWorkLog();
+            fetchMyWorkLogs();
+        } catch (error: any) {
+            console.error('Failed to clock out:', error);
+            const message = error.response?.data?.message || '퇴근 처리에 실패했습니다.';
+            alert(message);
+        } finally {
+            setClockLoading(false);
+        }
+    };
+
+    const formatTime = (dateString: string) => {
+        return new Date(dateString).toLocaleTimeString('ko-KR', {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
 
     if (user?.role !== 'WORKER') {
         return (
@@ -66,6 +120,55 @@ export const MyWorkLogsPage = () => {
 
     return (
         <PageContainer title="내 출퇴근 기록">
+            {/* 출퇴근 버튼 카드 */}
+            <div className="mb-6">
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="text-center md:text-left">
+                            {currentWorkLog ? (
+                                <>
+                                    <p className="text-lg font-semibold text-emerald-600">
+                                        🟢 근무 중
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        출근 시간: {formatTime(currentWorkLog.clockInAt)}
+                                    </p>
+                                </>
+                            ) : (
+                                <p className="text-lg font-semibold text-gray-500">
+                                    현재 근무 중이 아닙니다
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleClockIn}
+                                disabled={clockLoading || !!currentWorkLog}
+                                className={`px-6 py-3 rounded-lg font-semibold transition-colors ${currentWorkLog
+                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                    }`}
+                            >
+                                {clockLoading ? '처리 중...' : '출근하기'}
+                            </button>
+
+                            <button
+                                onClick={handleClockOut}
+                                disabled={clockLoading || !currentWorkLog}
+                                className={`px-6 py-3 rounded-lg font-semibold transition-colors ${!currentWorkLog
+                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                        : 'bg-red-500 hover:bg-red-600 text-white'
+                                    }`}
+                            >
+                                {clockLoading ? '처리 중...' : '퇴근하기'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* 날짜 필터 */}
             <div className="mb-6">
                 <div className="bg-white border border-gray-200 rounded-lg p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -79,7 +182,7 @@ export const MyWorkLogsPage = () => {
                                 onChange={(e) =>
                                     setDateFilter({ ...dateFilter, fromDate: e.target.value })
                                 }
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                             />
                         </div>
 
@@ -93,7 +196,7 @@ export const MyWorkLogsPage = () => {
                                 onChange={(e) =>
                                     setDateFilter({ ...dateFilter, toDate: e.target.value })
                                 }
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                             />
                         </div>
                     </div>
