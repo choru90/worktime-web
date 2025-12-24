@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import apiClient from '../../../lib/apiClient';
-import { WorkLog } from '../../../types/worklog';
+import apiClient from '../../lib/apiClient';
+import { WorkLog } from '../../types/worklog';
 
 interface WorkerDashboardProps {
     workerName?: string;
@@ -206,9 +206,9 @@ export const WorkerDashboard = ({ workerName }: WorkerDashboardProps) => {
                                 </div>
                                 <div className="text-right">
                                     <span className={`px-2 py-1 text-xs rounded-full ${log.status === 'ONGOING' ? 'bg-blue-100 text-blue-700' :
-                                            log.status === 'COMPLETED' ? 'bg-yellow-100 text-yellow-700' :
-                                                log.status === 'CONFIRMED' ? 'bg-green-100 text-green-700' :
-                                                    'bg-gray-100 text-gray-700'
+                                        log.status === 'COMPLETED' ? 'bg-yellow-100 text-yellow-700' :
+                                            log.status === 'CONFIRMED' ? 'bg-green-100 text-green-700' :
+                                                'bg-gray-100 text-gray-700'
                                         }`}>
                                         {log.status === 'ONGOING' ? '진행중' :
                                             log.status === 'COMPLETED' ? '검수대기' :
