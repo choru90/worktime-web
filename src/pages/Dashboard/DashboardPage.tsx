@@ -6,8 +6,11 @@ import { DashboardActionsSection } from './sections/DashboardActionsSection';
 import { DashboardTodaySchedulesSection } from './sections/DashboardTodaySchedulesSection';
 import { DashboardAttendanceSection } from './sections/DashboardAttendanceSection';
 import { DashboardTopWorkersSection } from './sections/DashboardTopWorkersSection';
+import { WorkerDashboard } from './WorkerDashboard';
+import { useAuth } from '../../hooks/useAuth';
 
 export const DashboardPage = () => {
+    const { user } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
 
     // YYYY-MM-DD format
@@ -19,6 +22,16 @@ export const DashboardPage = () => {
         setSearchParams({ date: e.target.value });
     };
 
+    // Worker용 대시보드
+    if (user?.role === 'WORKER') {
+        return (
+            <PageContainer title="대시보드">
+                <WorkerDashboard />
+            </PageContainer>
+        );
+    }
+
+    // Owner용 대시보드
     return (
         <PageContainer title="대시보드">
             {/* Header / Filter */}
@@ -63,3 +76,4 @@ export const DashboardPage = () => {
         </PageContainer>
     );
 };
+
