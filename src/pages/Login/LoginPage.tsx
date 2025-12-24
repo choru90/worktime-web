@@ -140,7 +140,13 @@ export const LoginPage = () => {
                 <p className="mt-6 text-center text-sm text-gray-500">
                     계정이 없으신가요?{' '}
                     <Link to="/signup" className="font-medium text-gray-900 hover:text-gray-700">
-                        회원가입
+                        사장님 회원가입
+                    </Link>
+                </p>
+                <p className="mt-2 text-center text-sm text-gray-500">
+                    초대 코드가 있으신가요?{' '}
+                    <Link to="/signup/worker" className="font-medium text-blue-600 hover:text-blue-500">
+                        알바생 회원가입
                     </Link>
                 </p>
             </div>
