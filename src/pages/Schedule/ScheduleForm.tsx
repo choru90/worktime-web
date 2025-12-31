@@ -47,7 +47,20 @@ export const ScheduleForm = ({
 
         try {
             setLoading(true);
-            await apiClient.post('/schedules/owner-requests', formData);
+
+            // 백엔드 DTO 형식으로 변환
+            const startAtUtc = `${formData.date}T${formData.startTime}:00+09:00`;
+            const endAtUtc = `${formData.date}T${formData.endTime}:00+09:00`;
+
+            const requestBody = {
+                workerId: formData.workerId,
+                startAtUtc: startAtUtc,
+                endAtUtc: endAtUtc,
+                timezone: 'Asia/Seoul',
+                requestType: 'OWNER_PROPOSAL'
+            };
+
+            await apiClient.post(`/workers/${formData.workerId}/schedules`, requestBody);
 
             // 폼 초기화
             setFormData({

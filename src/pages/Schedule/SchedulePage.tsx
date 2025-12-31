@@ -32,10 +32,16 @@ export const SchedulePage = () => {
     const fetchSchedules = async () => {
         try {
             setLoading(true);
-            const params: any = {
-                fromDate: filter.fromDate,
-                toDate: filter.toDate,
-            };
+
+            // 백엔드 파라미터 형식에 맞게 변환 (OffsetDateTime)
+            const params: any = {};
+
+            if (filter.fromDate) {
+                params.from = `${filter.fromDate}T00:00:00+09:00`;
+            }
+            if (filter.toDate) {
+                params.to = `${filter.toDate}T23:59:59+09:00`;
+            }
 
             if (filter.workerId) {
                 params.workerId = filter.workerId;
@@ -54,6 +60,9 @@ export const SchedulePage = () => {
             let schedulesData: Schedule[];
             if (Array.isArray(response.data)) {
                 schedulesData = response.data;
+            } else if (response.data?.schedules && Array.isArray(response.data.schedules)) {
+                // ScheduleListResponse 형식: { schedules: [...], totalCount: n }
+                schedulesData = response.data.schedules;
             } else if (response.data?.content && Array.isArray(response.data.content)) {
                 // 페이징된 응답의 경우
                 schedulesData = response.data.content;
