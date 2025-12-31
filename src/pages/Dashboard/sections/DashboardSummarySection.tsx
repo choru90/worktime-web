@@ -60,7 +60,7 @@ export const DashboardSummarySection: React.FC<Props> = ({ date }) => {
                 onClick={scrollToSchedules}
                 className="bg-white p-5 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
             >
-                <h3 className="text-gray-500 text-sm font-medium mb-2">오늘 근무</h3>
+                <h3 className="text-gray-500 text-sm font-medium mb-2">오늘 근무 예정</h3>
                 <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-bold text-gray-900">{today.scheduledCount}명</span>
                 </div>
