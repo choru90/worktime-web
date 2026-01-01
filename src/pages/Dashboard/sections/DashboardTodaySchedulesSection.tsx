@@ -19,16 +19,30 @@ export const DashboardTodaySchedulesSection: React.FC<Props> = ({ date }) => {
         try {
             setLoading(true);
             setError(null);
-            // Assuming getTodaySchedules returns { data: { items: [] } } or similar structure
-            // If API returns list directly, adjust accordingly. 
-            // Based on previous patterns, let's assume standard response wrapper or direct list.
-            // For now, let's assume it matches TodayScheduleListResponse structure from API definition.
             const response = await dashboardApi.getTodaySchedules(date);
-            // Adjust based on actual API response structure. 
-            // If backend is not ready, we might need safe navigation.
-            // Assuming response.data is TodayScheduleListResponse or List<Item>
-            // Let's handle both for robustness during dev.
-            const items = response.data?.items || (Array.isArray(response.data) ? response.data : []);
+
+            // API 응답 구조 처리: { schedules: [...] } 또는 배열
+            let rawSchedules: any[] = [];
+            if (response.data?.schedules && Array.isArray(response.data.schedules)) {
+                rawSchedules = response.data.schedules;
+            } else if (Array.isArray(response.data)) {
+                rawSchedules = response.data;
+            } else if (response.data?.items) {
+                rawSchedules = response.data.items;
+            }
+
+            // 필드 변환 (startAtUtc -> startTime, endAtUtc -> endTime)
+            const items: TodayScheduleItem[] = rawSchedules.map((s: any) => ({
+                id: s.id,
+                workerId: s.workerId,
+                workerName: s.workerName,
+                // UTC 시간에서 로컬 시간(HH:mm) 추출
+                startTime: s.startTime || (s.startAtUtc ? new Date(s.startAtUtc).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }) : ''),
+                endTime: s.endTime || (s.endAtUtc ? new Date(s.endAtUtc).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }) : ''),
+                status: s.status === 'CONFIRMED' ? 'SCHEDULED' : s.status, // CONFIRMED → SCHEDULED로 표시
+                flags: s.flags || [],
+            }));
+
             setSchedules(items);
         } catch (err) {
             console.error('Failed to fetch today schedules', err);

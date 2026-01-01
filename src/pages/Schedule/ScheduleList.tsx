@@ -4,14 +4,18 @@ interface ScheduleListProps {
     schedules: Schedule[];
     onApprove: (scheduleId: string) => void;
     onReject: (scheduleId: string) => void;
+    onWriteWorkLog?: (schedule: Schedule) => void;  // 알바생 근무 기록 작성
     isLoading?: boolean;
+    isWorker?: boolean;  // 알바생 여부
 }
 
 export const ScheduleList = ({
     schedules,
     onApprove,
     onReject,
+    onWriteWorkLog,
     isLoading,
+    isWorker = false,
 }: ScheduleListProps) => {
     const getStatusBadge = (status: string) => {
         const statusConfig: Record<
@@ -60,6 +64,10 @@ export const ScheduleList = ({
 
     const canApproveOrReject = (status: string) => {
         return status === 'REQUESTED_BY_WORKER' || status === 'REQUESTED_BY_OWNER' || status === 'PROPOSED_BY_OWNER';
+    };
+
+    const canWriteWorkLog = (status: string) => {
+        return status === 'CONFIRMED' && isWorker && onWriteWorkLog;
     };
 
     if (isLoading) {
@@ -154,6 +162,13 @@ export const ScheduleList = ({
                                             거절
                                         </button>
                                     </>
+                                ) : canWriteWorkLog(schedule.status) ? (
+                                    <button
+                                        onClick={() => onWriteWorkLog!(schedule)}
+                                        className="px-3 py-1 bg-emerald-600 text-white text-xs rounded-lg hover:bg-emerald-700 transition-colors"
+                                    >
+                                        근무 기록 작성
+                                    </button>
                                 ) : (
                                     <span className="text-gray-400">-</span>
                                 )}

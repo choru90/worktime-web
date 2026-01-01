@@ -6,8 +6,17 @@ import { RejectReasonModal } from './RejectReasonModal';
 import apiClient from '../../lib/apiClient';
 import { WorkLog, WorkLogFilter } from '../../types/worklog';
 import { Worker } from '../../types/worker';
+import { useAuth } from '../../hooks/useAuth';
+import { Navigate } from 'react-router-dom';
 
 export const WorkLogsPage = () => {
+    const { user } = useAuth();
+
+    // 알바생은 /my/worklogs로 리다이렉트
+    if (user?.role === 'WORKER') {
+        return <Navigate to="/my/worklogs" replace />;
+    }
+
     const [workLogs, setWorkLogs] = useState<WorkLog[]>([]);
     const [workers, setWorkers] = useState<Worker[]>([]);
     const [loading, setLoading] = useState(true);
@@ -125,6 +134,7 @@ export const WorkLogsPage = () => {
                 onConfirm={handleConfirm}
                 onReject={handleRejectClick}
                 isLoading={loading}
+                isOwner={true}
             />
 
             <RejectReasonModal

@@ -5,6 +5,7 @@ interface WorkLogListProps {
     onConfirm: (id: string) => void;
     onReject: (id: string) => void;
     isLoading?: boolean;
+    isOwner?: boolean;  // 사장님 여부 - 확정/반려 버튼 표시 제어
 }
 
 export const WorkLogList = ({
@@ -12,6 +13,7 @@ export const WorkLogList = ({
     onConfirm,
     onReject,
     isLoading,
+    isOwner = false,
 }: WorkLogListProps) => {
     const formatTime = (isoString: string | null) => {
         if (!isoString) return '-';
@@ -22,9 +24,13 @@ export const WorkLogList = ({
         });
     };
 
-    const formatWorkTime = (minutes: number) => {
+    const formatWorkTime = (minutes: number | null | undefined) => {
+        if (minutes === null || minutes === undefined || minutes <= 0) return '-';
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
+
+        if (hours === 0) return `${mins}분`;
+        if (mins === 0) return `${hours}시간`;
         return `${hours}시간 ${mins}분`;
     };
 
@@ -74,7 +80,7 @@ export const WorkLogList = ({
     };
 
     const canConfirmOrReject = (status: string) => {
-        return status === 'COMPLETED';
+        return isOwner && status === 'COMPLETED';
     };
 
     if (isLoading) {

@@ -3,6 +3,7 @@ import { PageContainer } from '../../components/common/PageContainer';
 import { ScheduleFilterBar } from './ScheduleFilterBar';
 import { ScheduleList } from './ScheduleList';
 import { ScheduleForm } from './ScheduleForm';
+import { WorkLogEntryModal } from './WorkLogEntryModal';
 import apiClient from '../../lib/apiClient';
 import { Schedule, ScheduleFilter } from '../../types/schedule';
 import { Worker } from '../../types/worker';
@@ -16,6 +17,7 @@ export const SchedulePage = () => {
     const [workers, setWorkers] = useState<Worker[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [selectedScheduleForWorkLog, setSelectedScheduleForWorkLog] = useState<Schedule | null>(null);
 
     // 초기 날짜 범위: 오늘 기준 ±7일
     const getInitialDateRange = () => {
@@ -63,21 +65,46 @@ export const SchedulePage = () => {
             console.log('API Response:', response.data);
 
             // API 응답 형식에 따라 데이터 추출
-            let schedulesData: Schedule[];
+            let rawSchedules: any[];
             if (Array.isArray(response.data)) {
-                schedulesData = response.data;
+                rawSchedules = response.data;
             } else if (response.data?.schedules && Array.isArray(response.data.schedules)) {
                 // ScheduleListResponse 형식: { schedules: [...], totalCount: n }
-                schedulesData = response.data.schedules;
+                rawSchedules = response.data.schedules;
             } else if (response.data?.content && Array.isArray(response.data.content)) {
                 // 페이징된 응답의 경우
-                schedulesData = response.data.content;
+                rawSchedules = response.data.content;
             } else if (response.data?.data && Array.isArray(response.data.data)) {
-                schedulesData = response.data.data;
+                rawSchedules = response.data.data;
             } else {
                 console.warn('Unexpected API response format:', response.data);
-                schedulesData = [];
+                rawSchedules = [];
             }
+
+            // startAtUtc, endAtUtc를 date, startTime, endTime으로 변환
+            const schedulesData: Schedule[] = rawSchedules.map((s: any) => {
+                let date = s.date || '';
+                let startTime = s.startTime || '';
+                let endTime = s.endTime || '';
+
+                // UTC 시간 필드가 있으면 변환
+                if (s.startAtUtc && !date) {
+                    const startDate = new Date(s.startAtUtc);
+                    date = startDate.toISOString().split('T')[0];
+                    startTime = startDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+                }
+                if (s.endAtUtc && !endTime) {
+                    const endDate = new Date(s.endAtUtc);
+                    endTime = endDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+                }
+
+                return {
+                    ...s,
+                    date,
+                    startTime,
+                    endTime,
+                };
+            });
 
             setSchedules(schedulesData);
         } catch (error) {
@@ -147,6 +174,16 @@ export const SchedulePage = () => {
         fetchSchedules();
     };
 
+    const handleWriteWorkLog = (schedule: Schedule) => {
+        setSelectedScheduleForWorkLog(schedule);
+    };
+
+    const handleWorkLogSubmitted = () => {
+        setSelectedScheduleForWorkLog(null);
+        fetchSchedules();
+        alert('근무 기록이 저장되었습니다.');
+    };
+
     return (
         <PageContainer title="근무 스케줄 관리">
             <div className="mb-4 flex justify-between items-center">
@@ -169,7 +206,9 @@ export const SchedulePage = () => {
                 schedules={schedules}
                 onApprove={handleApprove}
                 onReject={handleReject}
+                onWriteWorkLog={handleWriteWorkLog}
                 isLoading={loading}
+                isWorker={!isOwner}
             />
 
             {/* 스케줄 제안 모달 */}
@@ -184,6 +223,18 @@ export const SchedulePage = () => {
                         />
                     </div>
                 </div>
+            )}
+
+            {/* 근무 기록 작성 모달 (알바생용) */}
+            {selectedScheduleForWorkLog && (
+                <WorkLogEntryModal
+                    scheduleId={selectedScheduleForWorkLog.id}
+                    scheduledDate={selectedScheduleForWorkLog.date || ''}
+                    scheduledStartTime={selectedScheduleForWorkLog.startTime || ''}
+                    scheduledEndTime={selectedScheduleForWorkLog.endTime || ''}
+                    onSubmit={handleWorkLogSubmitted}
+                    onCancel={() => setSelectedScheduleForWorkLog(null)}
+                />
             )}
         </PageContainer>
     );
