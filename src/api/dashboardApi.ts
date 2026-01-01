@@ -136,9 +136,11 @@ export const dashboardApi = {
     },
 
     getTodaySchedules: (date?: string) => {
-        // TODO: Update endpoint when available or reuse schedule API
-        // Currently using placeholder or assuming an endpoint similar to summary
-        return apiClient.get('/owner/dashboard/schedules', { params: { date } });
+        // 기존 /schedules API 재사용 (오늘 날짜로 필터링)
+        const targetDate = date || new Date().toISOString().split('T')[0];
+        const from = `${targetDate}T00:00:00+09:00`;
+        const to = `${targetDate}T23:59:59+09:00`;
+        return apiClient.get('/schedules', { params: { from, to } });
     },
 
     getAttendance: (date?: string) => {
