@@ -22,6 +22,10 @@ export const ScheduleList = ({
                 label: '알바 요청',
                 className: 'bg-yellow-100 text-yellow-800',
             },
+            PROPOSED_BY_OWNER: {
+                label: '사장 제안',
+                className: 'bg-blue-100 text-blue-800',
+            },
             REQUESTED_BY_OWNER: {
                 label: '사장 제안',
                 className: 'bg-blue-100 text-blue-800',
@@ -33,6 +37,10 @@ export const ScheduleList = ({
             REJECTED: {
                 label: '거절',
                 className: 'bg-red-100 text-red-800',
+            },
+            CANCELED: {
+                label: '취소',
+                className: 'bg-gray-100 text-gray-800',
             },
         };
 
@@ -51,7 +59,7 @@ export const ScheduleList = ({
     };
 
     const canApproveOrReject = (status: string) => {
-        return status === 'REQUESTED_BY_WORKER' || status === 'REQUESTED_BY_OWNER';
+        return status === 'REQUESTED_BY_WORKER' || status === 'REQUESTED_BY_OWNER' || status === 'PROPOSED_BY_OWNER';
     };
 
     if (isLoading) {

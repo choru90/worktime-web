@@ -112,7 +112,11 @@ export const SchedulePage = () => {
         }
 
         try {
-            await apiClient.post(`/schedules/${scheduleId}/approve`);
+            // 역할에 따라 다른 API 호출
+            const endpoint = isOwner
+                ? `/schedules/${scheduleId}/confirm`
+                : `/worker/schedules/${scheduleId}/confirm`;
+            await apiClient.post(endpoint);
             fetchSchedules();
         } catch (error) {
             console.error('Failed to approve schedule:', error);
@@ -126,7 +130,11 @@ export const SchedulePage = () => {
         }
 
         try {
-            await apiClient.post(`/schedules/${scheduleId}/reject`);
+            // 역할에 따라 다른 API 호출
+            const endpoint = isOwner
+                ? `/schedules/${scheduleId}/reject`
+                : `/worker/schedules/${scheduleId}/reject`;
+            await apiClient.post(endpoint);
             fetchSchedules();
         } catch (error) {
             console.error('Failed to reject schedule:', error);
