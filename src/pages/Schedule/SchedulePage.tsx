@@ -6,8 +6,12 @@ import { ScheduleForm } from './ScheduleForm';
 import apiClient from '../../lib/apiClient';
 import { Schedule, ScheduleFilter } from '../../types/schedule';
 import { Worker } from '../../types/worker';
+import { useAuth } from '../../hooks/useAuth';
 
 export const SchedulePage = () => {
+    const { user } = useAuth();
+    const isOwner = user?.role === 'OWNER';
+
     const [schedules, setSchedules] = useState<Schedule[]>([]);
     const [workers, setWorkers] = useState<Worker[]>([]);
     const [loading, setLoading] = useState(true);
@@ -50,7 +54,9 @@ export const SchedulePage = () => {
                 params.status = filter.status;
             }
 
-            const response = await apiClient.get<any>('/schedules', {
+            // 사용자 역할에 따라 다른 API 호출
+            const endpoint = isOwner ? '/schedules' : '/worker/schedules';
+            const response = await apiClient.get<any>(endpoint, {
                 params,
             });
 
