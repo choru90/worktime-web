@@ -304,6 +304,8 @@ export const MonthlyCalendar = ({
                                             ? colors?.regular
                                             : colors?.schedule;
 
+                                        const isUnconfirmed = shift.type === 'schedule' && shift.status !== 'CONFIRMED';
+
                                         return (
                                             <div
                                                 key={shift.id}
@@ -311,10 +313,14 @@ export const MonthlyCalendar = ({
                                                     e.stopPropagation();
                                                     onShiftClick?.(shift, date);
                                                 }}
-                                                className={`text-xs px-1.5 py-1 rounded border truncate hover:opacity-80 transition-opacity cursor-pointer ${colorClass}`}
+                                                className={`text-xs px-1.5 py-1 rounded border truncate hover:opacity-80 transition-opacity cursor-pointer ${colorClass} ${isUnconfirmed ? 'border-dashed opacity-75' : ''
+                                                    }`}
                                             >
                                                 {shift.type === 'regular' && (
                                                     <span className="mr-1">📌</span>
+                                                )}
+                                                {isUnconfirmed && (
+                                                    <span className="mr-1">⏳</span>
                                                 )}
                                                 <span className="font-medium">{shift.workerName}</span>
                                                 <span className="ml-1 opacity-75">

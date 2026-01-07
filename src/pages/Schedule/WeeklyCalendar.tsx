@@ -295,7 +295,7 @@ export const WeeklyCalendar = ({
                                     <div className={`h-10 flex items-center justify-center border-b border-gray-100 sticky top-0 bg-white z-10 ${isToday ? 'bg-blue-50' : ''
                                         }`}>
                                         <div className={`text-center ${date.getDay() === 0 ? 'text-red-500' :
-                                                date.getDay() === 6 ? 'text-blue-500' : 'text-gray-700'
+                                            date.getDay() === 6 ? 'text-blue-500' : 'text-gray-700'
                                             }`}>
                                             <span className="text-xs font-medium mr-1">{dayNames[date.getDay()]}</span>
                                             <span className={`text-sm font-bold ${isToday ? 'px-2 py-0.5 bg-blue-500 text-white rounded-full' : ''}`}>
@@ -312,20 +312,28 @@ export const WeeklyCalendar = ({
                                         ))}
 
                                         {/* Shifts */}
-                                        {layoutedShifts.map(item => (
-                                            <div
-                                                key={item.id}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onShiftClick?.(item, date);
-                                                }}
-                                                style={item.style}
-                                                className={`absolute rounded border p-1 text-xs overflow-hidden cursor-pointer hover:opacity-80 transition-opacity flex flex-col justify-center ${item.colorClass} shadow-sm z-0`}
-                                            >
-                                                <div className="font-bold truncate">{item.workerName}</div>
-                                                <div className="truncate opacity-90">{item.startTime}-{item.endTime}</div>
-                                            </div>
-                                        ))}
+                                        {layoutedShifts.map(item => {
+                                            const isUnconfirmed = item.type === 'schedule' && item.status !== 'CONFIRMED';
+
+                                            return (
+                                                <div
+                                                    key={item.id}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onShiftClick?.(item, date);
+                                                    }}
+                                                    style={item.style}
+                                                    className={`absolute rounded border p-1 text-xs overflow-hidden cursor-pointer hover:opacity-80 transition-opacity flex flex-col justify-center ${item.colorClass} shadow-sm z-0 ${isUnconfirmed ? 'border-dashed opacity-75' : ''
+                                                        }`}
+                                                >
+                                                    <div className="font-bold truncate flex items-center gap-1">
+                                                        {isUnconfirmed && <span>⏳</span>}
+                                                        {item.workerName}
+                                                    </div>
+                                                    <div className="truncate opacity-90">{item.startTime}-{item.endTime}</div>
+                                                </div>
+                                            );
+                                        })}
 
                                         {/* Current Time Indicator (if today) */}
                                         {isToday && (

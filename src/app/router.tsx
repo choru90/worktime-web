@@ -14,6 +14,7 @@ import { MyPayrollPage } from '../pages/Payroll/MyPayrollPage';
 import { StoreSettingsPage } from '../pages/Store/StoreSettingsPage';
 import { MainLayout } from '../layouts/MainLayout';
 import { PrivateRoute, PublicRoute } from './PrivateRoute';
+import { MySchedulesPage } from '../pages/Schedule/MySchedulesPage';
 
 export const router = createBrowserRouter([
     {
@@ -100,6 +101,16 @@ export const router = createBrowserRouter([
             <PrivateRoute>
                 <MainLayout>
                     <MyWorkLogsPage />
+                </MainLayout>
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: '/my/schedules',
+        element: (
+            <PrivateRoute>
+                <MainLayout>
+                    <MySchedulesPage />
                 </MainLayout>
             </PrivateRoute>
         ),

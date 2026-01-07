@@ -227,7 +227,14 @@ export const WorkerDashboard = ({ workerName }: WorkerDashboardProps) => {
             </div>
 
             {/* Quick Links */}
-            <div className="grid grid-cols-2 gap-4 mt-6">
+            <div className="grid grid-cols-3 gap-4 mt-6">
+                <Link
+                    to="/my/schedules"
+                    className="bg-white rounded-xl shadow-sm p-4 text-center hover:bg-gray-50 transition-colors"
+                >
+                    <div className="text-2xl mb-2">📅</div>
+                    <p className="font-medium text-gray-700">내 스케줄</p>
+                </Link>
                 <Link
                     to="/my/worklogs"
                     className="bg-white rounded-xl shadow-sm p-4 text-center hover:bg-gray-50 transition-colors"
