@@ -5,6 +5,7 @@ import { Store, RegularShift, DAY_OF_WEEK_SHORT, DayOfWeek } from '../../types/s
 import { Worker } from '../../types/worker';
 import apiClient from '../../lib/apiClient';
 import { RegularShiftModal } from './RegularShiftModal';
+import { getWorkerColor } from '../../utils/colorUtils';
 
 const DAYS_OF_WEEK: DayOfWeek[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
 
@@ -163,13 +164,13 @@ export const StoreSettingsPage = () => {
                                 <div
                                     key={day}
                                     className={`border rounded-lg p-3 min-h-[150px] ${day === 'SATURDAY' || day === 'SUNDAY'
-                                            ? 'bg-gray-50'
-                                            : 'bg-white'
+                                        ? 'bg-gray-50'
+                                        : 'bg-white'
                                         }`}
                                 >
                                     <div className={`text-sm font-medium mb-2 ${day === 'SUNDAY' ? 'text-red-500' :
-                                            day === 'SATURDAY' ? 'text-blue-500' :
-                                                'text-gray-700'
+                                        day === 'SATURDAY' ? 'text-blue-500' :
+                                            'text-gray-700'
                                         }`}>
                                         {DAY_OF_WEEK_SHORT[day]}
                                     </div>
@@ -177,7 +178,7 @@ export const StoreSettingsPage = () => {
                                         {shiftsByDay[day].map(shift => (
                                             <div
                                                 key={shift.id}
-                                                className="text-xs p-2 bg-blue-100 text-blue-800 rounded border border-blue-200 group relative"
+                                                className={`text-xs p-2 rounded border group relative ${getWorkerColor(shift.workerId).regular}`}
                                             >
                                                 <div className="font-medium">{shift.workerName}</div>
                                                 <div className="opacity-75">

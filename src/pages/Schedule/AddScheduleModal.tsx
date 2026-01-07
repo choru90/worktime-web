@@ -34,17 +34,31 @@ export const AddScheduleModal = ({ date, workers, onClose, onCreated }: AddSched
 
         try {
             setLoading(true);
+            // 날짜 형식 변환 (YYYY-MM-DD)
+            const dateStr = formatDate(date);
+
+            // ISO 8601 형식으로 변환 (KST 가정 +09:00)
+            const startAtUtc = `${dateStr}T${startTime}:00+09:00`;
+            const endAtUtc = `${dateStr}T${endTime}:00+09:00`;
+
             await apiClient.post(`/workers/${workerId}/schedules`, {
                 workerId,
-                date: formatDate(date),
-                startTime,
-                endTime,
-                memo: memo || undefined,
+                startAtUtc,
+                endAtUtc,
+                timezone: 'Asia/Seoul',
+                requestType: 'OWNER_PROPOSAL',
+                // memo 필드는 ScheduleCreateRequest에 없음 -> 삭제하거나 별도 처리 필요. 
+                // ScheduleCreateRequest.kt를 보니 memo 필드가 없음. 백엔드에서 안 받으면 보내도 무시되거나 에러?
+                // 백엔드 DTO(ScheduleCreateRequest)에 memo가 없으므로 보내지 않음.
             });
             onCreated();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to create schedule:', error);
-            alert('스케줄 생성에 실패했습니다.');
+            if (error.response?.status === 409) {
+                alert('해당 시간에 이미 등록된 스케줄이 있습니다.\n기존 스케줄을 확인해주세요.');
+            } else {
+                alert(error.response?.data?.message || '스케줄 생성에 실패했습니다.');
+            }
         } finally {
             setLoading(false);
         }

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Schedule } from '../../types/schedule';
 import { RegularShift, DayOfWeek } from '../../types/store';
+import { getWorkerColor } from '../../utils/colorUtils';
 
 interface CalendarShift {
     id: string;
@@ -21,29 +22,7 @@ interface ScheduleCalendarProps {
     onMonthChange?: (year: number, month: number) => void;
 }
 
-// 색상 배열 (알바별 고유 색상 배정용)
-const WORKER_COLORS = [
-    'bg-blue-100 text-blue-800 border-blue-200',
-    'bg-green-100 text-green-800 border-green-200',
-    'bg-purple-100 text-purple-800 border-purple-200',
-    'bg-orange-100 text-orange-800 border-orange-200',
-    'bg-pink-100 text-pink-800 border-pink-200',
-    'bg-teal-100 text-teal-800 border-teal-200',
-    'bg-indigo-100 text-indigo-800 border-indigo-200',
-    'bg-yellow-100 text-yellow-800 border-yellow-200',
-];
 
-// 고정 근무용 색상 (더 진한 색)
-const REGULAR_SHIFT_COLORS = [
-    'bg-blue-200 text-blue-900 border-blue-300',
-    'bg-green-200 text-green-900 border-green-300',
-    'bg-purple-200 text-purple-900 border-purple-300',
-    'bg-orange-200 text-orange-900 border-orange-300',
-    'bg-pink-200 text-pink-900 border-pink-300',
-    'bg-teal-200 text-teal-900 border-teal-300',
-    'bg-indigo-200 text-indigo-900 border-indigo-300',
-    'bg-yellow-200 text-yellow-900 border-yellow-300',
-];
 
 // JS Date의 getDay()를 DayOfWeek로 변환
 const getDayOfWeekFromDate = (date: Date): DayOfWeek => {
@@ -92,14 +71,11 @@ export const ScheduleCalendar = ({ schedules, regularShifts = [], onDateClick, o
         return [...new Set([...scheduleWorkerIds, ...regularShiftWorkerIds])];
     }, [schedules, regularShifts]);
 
-    // Worker별 색상 맵핑
+    // Worker별 색상 맵핑 (ID 해시 기반)
     const workerColorMap = useMemo(() => {
         const colorMap: Record<string, { schedule: string; regular: string }> = {};
-        allWorkerIds.forEach((workerId, index) => {
-            colorMap[workerId] = {
-                schedule: WORKER_COLORS[index % WORKER_COLORS.length],
-                regular: REGULAR_SHIFT_COLORS[index % REGULAR_SHIFT_COLORS.length],
-            };
+        allWorkerIds.forEach((workerId) => {
+            colorMap[workerId] = getWorkerColor(workerId);
         });
         return colorMap;
     }, [allWorkerIds]);
@@ -317,8 +293,8 @@ export const ScheduleCalendar = ({ schedules, regularShifts = [], onDateClick, o
                                     {dayShifts.slice(0, 3).map((shift) => {
                                         const colors = workerColorMap[shift.workerId];
                                         const colorClass = shift.type === 'regular'
-                                            ? (colors?.regular || REGULAR_SHIFT_COLORS[0])
-                                            : (colors?.schedule || WORKER_COLORS[0]);
+                                            ? colors?.regular
+                                            : colors?.schedule;
 
                                         return (
                                             <div
@@ -373,7 +349,7 @@ export const ScheduleCalendar = ({ schedules, regularShifts = [], onDateClick, o
                         return (
                             <span
                                 key={workerId}
-                                className={`px-2 py-0.5 rounded border ${colors?.schedule || WORKER_COLORS[0]}`}
+                                className={`px-2 py-0.5 rounded border ${colors?.schedule}`}
                             >
                                 {name}
                             </span>
