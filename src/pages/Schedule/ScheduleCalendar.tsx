@@ -16,7 +16,9 @@ interface ScheduleCalendarProps {
     schedules: Schedule[];
     regularShifts?: RegularShift[];
     onDateClick?: (date: Date) => void;
-    onShiftClick?: (shift: CalendarShift) => void;
+    onShiftClick?: (shift: CalendarShift, date: Date) => void;
+    onSyncMonth?: (year: number, month: number) => void;
+    onMonthChange?: (year: number, month: number) => void;
 }
 
 // 색상 배열 (알바별 고유 색상 배정용)
@@ -49,7 +51,7 @@ const getDayOfWeekFromDate = (date: Date): DayOfWeek => {
     return dayMap[date.getDay()];
 };
 
-export const ScheduleCalendar = ({ schedules, regularShifts = [], onDateClick, onShiftClick }: ScheduleCalendarProps) => {
+export const ScheduleCalendar = ({ schedules, regularShifts = [], onDateClick, onShiftClick, onSyncMonth, onMonthChange }: ScheduleCalendarProps) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
 
@@ -150,7 +152,11 @@ export const ScheduleCalendar = ({ schedules, regularShifts = [], onDateClick, o
 
     // 특정 날짜의 모든 시프트 (고정 근무 + 스케줄) 가져오기
     const getShiftsForDate = (date: Date): CalendarShift[] => {
-        const dateKey = date.toISOString().split('T')[0];
+        // 로컬 시간대 기준으로 dateKey 생성 (UTC가 아닌 로컬)
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const dateKey = `${year}-${month}-${day}`;
         const dayOfWeek = getDayOfWeekFromDate(date);
 
         // 해당 요일의 고정 근무
@@ -173,15 +179,21 @@ export const ScheduleCalendar = ({ schedules, regularShifts = [], onDateClick, o
     };
 
     const goToPreviousMonth = () => {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+        const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+        setCurrentDate(newDate);
+        onMonthChange?.(newDate.getFullYear(), newDate.getMonth() + 1);
     };
 
     const goToNextMonth = () => {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+        const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+        setCurrentDate(newDate);
+        onMonthChange?.(newDate.getFullYear(), newDate.getMonth() + 1);
     };
 
     const goToToday = () => {
-        setCurrentDate(new Date());
+        const newDate = new Date();
+        setCurrentDate(newDate);
+        onMonthChange?.(newDate.getFullYear(), newDate.getMonth() + 1);
     };
 
     const isToday = (date: Date) => {
@@ -223,6 +235,14 @@ export const ScheduleCalendar = ({ schedules, regularShifts = [], onDateClick, o
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    {onSyncMonth && (
+                        <button
+                            onClick={() => onSyncMonth(currentDate.getFullYear(), currentDate.getMonth() + 1)}
+                            className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1"
+                        >
+                            🔄 고정 일정 불러오기
+                        </button>
+                    )}
                     <button
                         onClick={goToToday}
                         className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
@@ -305,9 +325,9 @@ export const ScheduleCalendar = ({ schedules, regularShifts = [], onDateClick, o
                                                 key={shift.id}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    onShiftClick?.(shift);
+                                                    onShiftClick?.(shift, date);
                                                 }}
-                                                className={`text-xs px-1.5 py-1 rounded border truncate hover:opacity-80 transition-opacity ${colorClass}`}
+                                                className={`text-xs px-1.5 py-1 rounded border truncate hover:opacity-80 transition-opacity cursor-pointer ${colorClass}`}
                                             >
                                                 {shift.type === 'regular' && (
                                                     <span className="mr-1">📌</span>

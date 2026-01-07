@@ -5,12 +5,23 @@ import { ScheduleList } from './ScheduleList';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { ScheduleForm } from './ScheduleForm';
 import { WorkLogEntryModal } from './WorkLogEntryModal';
+import { ShiftDetailModal } from './ShiftDetailModal';
+import { AddScheduleModal } from './AddScheduleModal';
 import apiClient from '../../lib/apiClient';
 import { Schedule, ScheduleFilter } from '../../types/schedule';
 import { Worker } from '../../types/worker';
-import { RegularShift } from '../../types/store';
-import { storeApi, regularShiftApi } from '../../api/storeApi';
 import { useAuth } from '../../hooks/useAuth';
+import { storeApi, regularShiftApi } from '../../api/storeApi';
+
+interface CalendarShift {
+    id: string;
+    workerName: string;
+    workerId: string;
+    startTime: string;
+    endTime: string;
+    type: 'regular' | 'schedule';
+    status?: string;
+}
 
 export const SchedulePage = () => {
     const { user } = useAuth();
@@ -22,19 +33,31 @@ export const SchedulePage = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedScheduleForWorkLog, setSelectedScheduleForWorkLog] = useState<Schedule | null>(null);
     const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
-    const [regularShifts, setRegularShifts] = useState<RegularShift[]>([]);
+    const [storeIds, setStoreIds] = useState<string[]>([]);
 
-    // 초기 날짜 범위: 오늘 기준 ±7일
+    // 캘린더 편집용 상태
+    const [selectedDateForAdd, setSelectedDateForAdd] = useState<Date | null>(null);
+    const [selectedShiftForDetail, setSelectedShiftForDetail] = useState<{ shift: CalendarShift; date: Date } | null>(null);
+
+    // 날짜를 YYYY-MM-DD 형식으로 변환 (로컬 시간 기준)
+    const toLocalDateString = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    // 초기 날짜 범위: 이번 달 1일 ~ 말일
     const getInitialDateRange = () => {
         const today = new Date();
-        const fromDate = new Date(today);
-        fromDate.setDate(today.getDate() - 7);
-        const toDate = new Date(today);
-        toDate.setDate(today.getDate() + 7);
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
 
         return {
-            fromDate: fromDate.toISOString().split('T')[0],
-            toDate: toDate.toISOString().split('T')[0],
+            fromDate: toLocalDateString(firstDay),
+            toDate: toLocalDateString(lastDay),
         };
     };
 
@@ -92,10 +115,14 @@ export const SchedulePage = () => {
                 let startTime = s.startTime || '';
                 let endTime = s.endTime || '';
 
-                // UTC 시간 필드가 있으면 변환
+                // UTC 시간 필드가 있으면 변환 (로컬 시간대 기준으로 날짜 추출)
                 if (s.startAtUtc && !date) {
                     const startDate = new Date(s.startAtUtc);
-                    date = startDate.toISOString().split('T')[0];
+                    // 로컬 시간대로 날짜 포맷 (UTC가 아닌 로컬)
+                    const year = startDate.getFullYear();
+                    const month = String(startDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(startDate.getDate()).padStart(2, '0');
+                    date = `${year}-${month}-${day}`;
                     startTime = startDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
                 }
                 if (s.endAtUtc && !endTime) {
@@ -130,28 +157,19 @@ export const SchedulePage = () => {
         }
     };
 
-    // 영업장과 고정 근무 로드 (OWNER만)
-    const fetchStoresAndRegularShifts = async () => {
-        if (!isOwner) return;
-
-        try {
-            const storesData = await storeApi.getStores();
-
-            // 모든 영업장의 고정 근무를 합쳐서 로드
-            const allShifts: RegularShift[] = [];
-            for (const store of storesData) {
-                const shifts = await regularShiftApi.getRegularShifts(store.id);
-                allShifts.push(...shifts);
-            }
-            setRegularShifts(allShifts);
-        } catch (error) {
-            console.error('Failed to fetch stores/regular shifts:', error);
-        }
-    };
-
     useEffect(() => {
         fetchWorkers();
-        fetchStoresAndRegularShifts();
+        if (isOwner) {
+            const fetchStores = async () => {
+                try {
+                    const storesData = await storeApi.getStores();
+                    setStoreIds(storesData.map(s => s.id));
+                } catch (error) {
+                    console.error('Failed to fetch stores:', error);
+                }
+            };
+            fetchStores();
+        }
     }, [isOwner]);
 
     useEffect(() => {
@@ -209,6 +227,45 @@ export const SchedulePage = () => {
         alert('근무 기록이 저장되었습니다.');
     };
 
+    const handleSyncMonth = async (year: number, month: number) => {
+        if (storeIds.length === 0) {
+            alert('등록된 영업장이 없습니다.');
+            return;
+        }
+
+        if (!window.confirm(`${year}년 ${month}월의 고정 근무를 스케줄로 불러오시겠습니까?\n이미 생성된 스케줄은 유지됩니다.`)) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            // 모든 영업장에 대해 해당 월 스케줄 생성
+            for (const storeId of storeIds) {
+                await regularShiftApi.generateMonthlySchedules(storeId, year, month);
+            }
+            // 스케줄 목록 갱신
+            fetchSchedules();
+            alert('고정 근무 일정을 불러왔습니다.');
+        } catch (error) {
+            console.error('Failed to sync monthly schedules:', error);
+            alert('일정 불러오기에 실패했습니다.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleMonthChange = (year: number, month: number) => {
+        // month는 1-based
+        const firstDay = new Date(year, month - 1, 1);
+        const lastDay = new Date(year, month, 0);
+
+        setFilter(prev => ({
+            ...prev,
+            fromDate: toLocalDateString(firstDay),
+            toDate: toLocalDateString(lastDay)
+        }));
+    };
+
     return (
         <PageContainer title="근무 스케줄 관리">
             <div className="mb-4 flex justify-between items-center">
@@ -246,7 +303,7 @@ export const SchedulePage = () => {
                     onClick={() => setShowCreateModal(true)}
                     className="bg-gray-900 hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-lg transition-colors"
                 >
-                    + 스케줄 제안
+                    + 스케줄 추가
                 </button>
             </div>
 
@@ -263,7 +320,10 @@ export const SchedulePage = () => {
             {viewMode === 'calendar' ? (
                 <ScheduleCalendar
                     schedules={schedules}
-                    regularShifts={regularShifts}
+                    onDateClick={(date) => setSelectedDateForAdd(date)}
+                    onShiftClick={(shift, date) => setSelectedShiftForDetail({ shift, date })}
+                    onSyncMonth={isOwner ? handleSyncMonth : undefined}
+                    onMonthChange={handleMonthChange}
                 />
             ) : (
                 <ScheduleList
@@ -299,6 +359,37 @@ export const SchedulePage = () => {
                     scheduledEndTime={selectedScheduleForWorkLog.endTime || ''}
                     onSubmit={handleWorkLogSubmitted}
                     onCancel={() => setSelectedScheduleForWorkLog(null)}
+                />
+            )}
+
+            {/* 날짜 클릭 시 스케줄 추가 모달 */}
+            {selectedDateForAdd && (
+                <AddScheduleModal
+                    date={selectedDateForAdd}
+                    workers={workers}
+                    onClose={() => setSelectedDateForAdd(null)}
+                    onCreated={() => {
+                        setSelectedDateForAdd(null);
+                        fetchSchedules();
+                    }}
+                />
+            )}
+
+            {/* 시프트 클릭 시 상세 정보 모달 */}
+            {selectedShiftForDetail && (
+                <ShiftDetailModal
+                    shift={selectedShiftForDetail.shift}
+                    date={selectedShiftForDetail.date}
+                    schedules={schedules}
+                    regularShifts={[]}
+                    onClose={() => setSelectedShiftForDetail(null)}
+                    onUpdated={() => {
+                        setSelectedShiftForDetail(null);
+                        fetchSchedules();
+                    }}
+                    onDeleteRegularShift={async () => {
+                        // 더 이상 고정 근무 삭제 기능 사용 안함 (개별 스케줄로 관리)
+                    }}
                 />
             )}
         </PageContainer>

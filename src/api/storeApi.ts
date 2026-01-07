@@ -99,4 +99,11 @@ export const regularShiftApi = {
         const response = await apiClient.get<RegularShift[]>(`/workers/${workerId}/regular-shifts`);
         return response.data;
     },
+
+    // 월별 스케줄 자동 생성
+    generateMonthlySchedules: async (storeId: string, year: number, month: number): Promise<void> => {
+        await apiClient.post(`/stores/${storeId}/generate-schedules`, null, {
+            params: { year, month }
+        });
+    },
 };

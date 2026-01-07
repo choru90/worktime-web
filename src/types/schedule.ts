@@ -5,7 +5,7 @@ export interface Schedule {
     date: string;
     startTime: string;
     endTime: string;
-    status: 'REQUESTED_BY_WORKER' | 'REQUESTED_BY_OWNER' | 'CONFIRMED' | 'REJECTED';
+    status: 'REQUESTED_BY_WORKER' | 'REQUESTED_BY_OWNER' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED';
     requestedBy?: 'WORKER' | 'OWNER';
     memo?: string | null;
 }
