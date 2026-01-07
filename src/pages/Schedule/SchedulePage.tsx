@@ -8,6 +8,8 @@ import { WorkLogEntryModal } from './WorkLogEntryModal';
 import apiClient from '../../lib/apiClient';
 import { Schedule, ScheduleFilter } from '../../types/schedule';
 import { Worker } from '../../types/worker';
+import { RegularShift } from '../../types/store';
+import { storeApi, regularShiftApi } from '../../api/storeApi';
 import { useAuth } from '../../hooks/useAuth';
 
 export const SchedulePage = () => {
@@ -20,6 +22,7 @@ export const SchedulePage = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedScheduleForWorkLog, setSelectedScheduleForWorkLog] = useState<Schedule | null>(null);
     const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
+    const [regularShifts, setRegularShifts] = useState<RegularShift[]>([]);
 
     // 초기 날짜 범위: 오늘 기준 ±7일
     const getInitialDateRange = () => {
@@ -127,9 +130,29 @@ export const SchedulePage = () => {
         }
     };
 
+    // 영업장과 고정 근무 로드 (OWNER만)
+    const fetchStoresAndRegularShifts = async () => {
+        if (!isOwner) return;
+
+        try {
+            const storesData = await storeApi.getStores();
+
+            // 모든 영업장의 고정 근무를 합쳐서 로드
+            const allShifts: RegularShift[] = [];
+            for (const store of storesData) {
+                const shifts = await regularShiftApi.getRegularShifts(store.id);
+                allShifts.push(...shifts);
+            }
+            setRegularShifts(allShifts);
+        } catch (error) {
+            console.error('Failed to fetch stores/regular shifts:', error);
+        }
+    };
+
     useEffect(() => {
         fetchWorkers();
-    }, []);
+        fetchStoresAndRegularShifts();
+    }, [isOwner]);
 
     useEffect(() => {
         fetchSchedules();
@@ -196,8 +219,8 @@ export const SchedulePage = () => {
                         <button
                             onClick={() => setViewMode('calendar')}
                             className={`px-3 py-1.5 text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === 'calendar'
-                                    ? 'bg-gray-900 text-white'
-                                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                                ? 'bg-gray-900 text-white'
+                                : 'bg-white text-gray-600 hover:bg-gray-50'
                                 }`}
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,8 +231,8 @@ export const SchedulePage = () => {
                         <button
                             onClick={() => setViewMode('list')}
                             className={`px-3 py-1.5 text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === 'list'
-                                    ? 'bg-gray-900 text-white'
-                                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                                ? 'bg-gray-900 text-white'
+                                : 'bg-white text-gray-600 hover:bg-gray-50'
                                 }`}
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,6 +263,7 @@ export const SchedulePage = () => {
             {viewMode === 'calendar' ? (
                 <ScheduleCalendar
                     schedules={schedules}
+                    regularShifts={regularShifts}
                 />
             ) : (
                 <ScheduleList

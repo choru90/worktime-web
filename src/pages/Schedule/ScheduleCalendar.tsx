@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
 import { Schedule } from '../../types/schedule';
+import { RegularShift, DayOfWeek } from '../../types/store';
 
 interface CalendarShift {
     id: string;
     workerName: string;
+    workerId: string;
     startTime: string;
     endTime: string;
     type: 'regular' | 'schedule';
@@ -12,6 +14,7 @@ interface CalendarShift {
 
 interface ScheduleCalendarProps {
     schedules: Schedule[];
+    regularShifts?: RegularShift[];
     onDateClick?: (date: Date) => void;
     onShiftClick?: (shift: CalendarShift) => void;
 }
@@ -28,7 +31,25 @@ const WORKER_COLORS = [
     'bg-yellow-100 text-yellow-800 border-yellow-200',
 ];
 
-export const ScheduleCalendar = ({ schedules, onDateClick, onShiftClick }: ScheduleCalendarProps) => {
+// 고정 근무용 색상 (더 진한 색)
+const REGULAR_SHIFT_COLORS = [
+    'bg-blue-200 text-blue-900 border-blue-300',
+    'bg-green-200 text-green-900 border-green-300',
+    'bg-purple-200 text-purple-900 border-purple-300',
+    'bg-orange-200 text-orange-900 border-orange-300',
+    'bg-pink-200 text-pink-900 border-pink-300',
+    'bg-teal-200 text-teal-900 border-teal-300',
+    'bg-indigo-200 text-indigo-900 border-indigo-300',
+    'bg-yellow-200 text-yellow-900 border-yellow-300',
+];
+
+// JS Date의 getDay()를 DayOfWeek로 변환
+const getDayOfWeekFromDate = (date: Date): DayOfWeek => {
+    const dayMap: DayOfWeek[] = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    return dayMap[date.getDay()];
+};
+
+export const ScheduleCalendar = ({ schedules, regularShifts = [], onDateClick, onShiftClick }: ScheduleCalendarProps) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
 
@@ -40,11 +61,10 @@ export const ScheduleCalendar = ({ schedules, onDateClick, onShiftClick }: Sched
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
 
-        // 달력에 표시할 날짜 배열 (이전 달/다음 달 날짜 포함)
         const days: Date[] = [];
 
         // 이전 달의 날짜들 (첫 주 채우기)
-        const firstDayOfWeek = firstDay.getDay(); // 0 (일) ~ 6 (토)
+        const firstDayOfWeek = firstDay.getDay();
         for (let i = firstDayOfWeek; i > 0; i--) {
             days.push(new Date(year, month, 1 - i));
         }
@@ -55,7 +75,7 @@ export const ScheduleCalendar = ({ schedules, onDateClick, onShiftClick }: Sched
         }
 
         // 다음 달의 날짜들 (마지막 주 채우기)
-        const remainingDays = 42 - days.length; // 6주 표시
+        const remainingDays = 42 - days.length;
         for (let i = 1; i <= remainingDays; i++) {
             days.push(new Date(year, month + 1, i));
         }
@@ -63,15 +83,42 @@ export const ScheduleCalendar = ({ schedules, onDateClick, onShiftClick }: Sched
         return days;
     }, [currentDate]);
 
+    // 모든 근무자 ID 수집 (스케줄 + 고정근무)
+    const allWorkerIds = useMemo(() => {
+        const scheduleWorkerIds = schedules.map(s => s.workerId);
+        const regularShiftWorkerIds = regularShifts.map(s => s.workerId);
+        return [...new Set([...scheduleWorkerIds, ...regularShiftWorkerIds])];
+    }, [schedules, regularShifts]);
+
     // Worker별 색상 맵핑
     const workerColorMap = useMemo(() => {
-        const uniqueWorkers = [...new Set(schedules.map(s => s.workerId))];
-        const colorMap: Record<string, string> = {};
-        uniqueWorkers.forEach((workerId, index) => {
-            colorMap[workerId] = WORKER_COLORS[index % WORKER_COLORS.length];
+        const colorMap: Record<string, { schedule: string; regular: string }> = {};
+        allWorkerIds.forEach((workerId, index) => {
+            colorMap[workerId] = {
+                schedule: WORKER_COLORS[index % WORKER_COLORS.length],
+                regular: REGULAR_SHIFT_COLORS[index % REGULAR_SHIFT_COLORS.length],
+            };
         });
         return colorMap;
-    }, [schedules]);
+    }, [allWorkerIds]);
+
+    // 요일별 고정 근무 맵핑
+    const regularShiftsByDay = useMemo(() => {
+        const map: Record<DayOfWeek, RegularShift[]> = {
+            SUNDAY: [], MONDAY: [], TUESDAY: [], WEDNESDAY: [],
+            THURSDAY: [], FRIDAY: [], SATURDAY: []
+        };
+        regularShifts.forEach(shift => {
+            if (shift.active) {
+                map[shift.dayOfWeek].push(shift);
+            }
+        });
+        // 시간순 정렬
+        Object.keys(map).forEach(day => {
+            map[day as DayOfWeek].sort((a, b) => a.startTime.localeCompare(b.startTime));
+        });
+        return map;
+    }, [regularShifts]);
 
     // 날짜별 스케줄 그룹핑
     const schedulesByDate = useMemo(() => {
@@ -85,6 +132,7 @@ export const ScheduleCalendar = ({ schedules, onDateClick, onShiftClick }: Sched
             map[dateKey].push({
                 id: schedule.id,
                 workerName: schedule.workerName,
+                workerId: schedule.workerId,
                 startTime: schedule.startTime,
                 endTime: schedule.endTime,
                 type: 'schedule',
@@ -100,6 +148,30 @@ export const ScheduleCalendar = ({ schedules, onDateClick, onShiftClick }: Sched
         return map;
     }, [schedules]);
 
+    // 특정 날짜의 모든 시프트 (고정 근무 + 스케줄) 가져오기
+    const getShiftsForDate = (date: Date): CalendarShift[] => {
+        const dateKey = date.toISOString().split('T')[0];
+        const dayOfWeek = getDayOfWeekFromDate(date);
+
+        // 해당 요일의 고정 근무
+        const regularShiftsForDay = regularShiftsByDay[dayOfWeek].map(shift => ({
+            id: `regular-${shift.id}`,
+            workerName: shift.workerName,
+            workerId: shift.workerId,
+            startTime: shift.startTime.substring(0, 5),
+            endTime: shift.endTime.substring(0, 5),
+            type: 'regular' as const,
+        }));
+
+        // 해당 날짜의 추가 스케줄
+        const additionalSchedules = schedulesByDate[dateKey] || [];
+
+        // 합치고 시간순 정렬
+        return [...regularShiftsForDay, ...additionalSchedules].sort((a, b) =>
+            a.startTime.localeCompare(b.startTime)
+        );
+    };
+
     const goToPreviousMonth = () => {
         setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
     };
@@ -110,10 +182,6 @@ export const ScheduleCalendar = ({ schedules, onDateClick, onShiftClick }: Sched
 
     const goToToday = () => {
         setCurrentDate(new Date());
-    };
-
-    const formatDateKey = (date: Date) => {
-        return date.toISOString().split('T')[0];
     };
 
     const isToday = (date: Date) => {
@@ -202,8 +270,7 @@ export const ScheduleCalendar = ({ schedules, onDateClick, onShiftClick }: Sched
                 {/* Calendar Days */}
                 <div className="grid grid-cols-7 gap-1">
                     {calendarDays.map((date, index) => {
-                        const dateKey = formatDateKey(date);
-                        const dayShifts = schedulesByDate[dateKey] || [];
+                        const dayShifts = getShiftsForDate(date);
                         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
                         return (
@@ -228,8 +295,10 @@ export const ScheduleCalendar = ({ schedules, onDateClick, onShiftClick }: Sched
                                 {/* Shifts */}
                                 <div className="space-y-1">
                                     {dayShifts.slice(0, 3).map((shift) => {
-                                        const schedule = schedules.find(s => s.id === shift.id);
-                                        const colorClass = schedule ? workerColorMap[schedule.workerId] : WORKER_COLORS[0];
+                                        const colors = workerColorMap[shift.workerId];
+                                        const colorClass = shift.type === 'regular'
+                                            ? (colors?.regular || REGULAR_SHIFT_COLORS[0])
+                                            : (colors?.schedule || WORKER_COLORS[0]);
 
                                         return (
                                             <div
@@ -240,6 +309,9 @@ export const ScheduleCalendar = ({ schedules, onDateClick, onShiftClick }: Sched
                                                 }}
                                                 className={`text-xs px-1.5 py-1 rounded border truncate hover:opacity-80 transition-opacity ${colorClass}`}
                                             >
+                                                {shift.type === 'regular' && (
+                                                    <span className="mr-1">📌</span>
+                                                )}
                                                 <span className="font-medium">{shift.workerName}</span>
                                                 <span className="ml-1 opacity-75">
                                                     {shift.startTime}-{shift.endTime}
@@ -261,23 +333,35 @@ export const ScheduleCalendar = ({ schedules, onDateClick, onShiftClick }: Sched
 
             {/* Legend */}
             <div className="px-6 py-3 border-t border-gray-100 bg-gray-50">
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span className="font-medium">근무자:</span>
-                    {Object.entries(workerColorMap).slice(0, 5).map(([workerId, colorClass]) => {
-                        const worker = schedules.find(s => s.workerId === workerId);
-                        if (!worker) return null;
+                <div className="flex items-center gap-4 text-sm text-gray-600 flex-wrap">
+                    <span className="font-medium">범례:</span>
+                    <span className="flex items-center gap-1">
+                        <span className="w-3 h-3 bg-blue-200 rounded border border-blue-300"></span>
+                        📌 고정근무
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <span className="w-3 h-3 bg-blue-100 rounded border border-blue-200"></span>
+                        추가스케줄
+                    </span>
+                    <span className="mx-2">|</span>
+                    {allWorkerIds.slice(0, 4).map((workerId) => {
+                        const schedule = schedules.find(s => s.workerId === workerId);
+                        const shift = regularShifts.find(s => s.workerId === workerId);
+                        const name = schedule?.workerName || shift?.workerName;
+                        if (!name) return null;
+                        const colors = workerColorMap[workerId];
                         return (
                             <span
                                 key={workerId}
-                                className={`px-2 py-0.5 rounded border ${colorClass}`}
+                                className={`px-2 py-0.5 rounded border ${colors?.schedule || WORKER_COLORS[0]}`}
                             >
-                                {worker.workerName}
+                                {name}
                             </span>
                         );
                     })}
-                    {Object.keys(workerColorMap).length > 5 && (
+                    {allWorkerIds.length > 4 && (
                         <span className="text-gray-500">
-                            외 {Object.keys(workerColorMap).length - 5}명
+                            외 {allWorkerIds.length - 4}명
                         </span>
                     )}
                 </div>
