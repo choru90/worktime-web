@@ -11,6 +11,7 @@ import { MyWorkLogsPage } from '../pages/WorkLogs/MyWorkLogsPage';
 import { PayrollPage } from '../pages/Payroll/PayrollPage';
 import { WorkerPayrollDetailPage } from '../pages/Payroll/WorkerPayrollDetailPage';
 import { MyPayrollPage } from '../pages/Payroll/MyPayrollPage';
+import { StoreSettingsPage } from '../pages/Store/StoreSettingsPage';
 import { MainLayout } from '../layouts/MainLayout';
 import { PrivateRoute, PublicRoute } from './PrivateRoute';
 
@@ -149,6 +150,16 @@ export const router = createBrowserRouter([
             <PrivateRoute>
                 <MainLayout>
                     <DashboardPage />
+                </MainLayout>
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: '/store/settings',
+        element: (
+            <PrivateRoute>
+                <MainLayout>
+                    <StoreSettingsPage />
                 </MainLayout>
             </PrivateRoute>
         ),

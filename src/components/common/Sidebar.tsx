@@ -5,6 +5,7 @@ interface SidebarProps { }
 
 const ownerMenuItems = [
     { path: '/dashboard', label: '대시보드', icon: '📊' },
+    { path: '/store/settings', label: '영업장 설정', icon: '🏪' },
     { path: '/workers', label: '알바생 관리', icon: '👥' },
     { path: '/schedule', label: '스케줄', icon: '📅' },
     { path: '/worklogs', label: '근무 기록', icon: '⏰' },
