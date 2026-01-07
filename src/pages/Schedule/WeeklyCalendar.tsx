@@ -149,23 +149,63 @@ export const WeeklyCalendar = ({
         return hour * 60 + minute;
     };
 
-    // 스케줄 위치 및 높이 계산
-    const getShiftStyle = (shift: CalendarShift) => {
-        const startMinutes = getMinutesFromTime(shift.startTime);
-        const endMinutes = getMinutesFromTime(shift.endTime);
-        const duration = endMinutes - startMinutes;
+    // 스케줄 레이아웃 계산 함수
+    const calculateLayout = (shifts: CalendarShift[]) => {
+        // 1. 시작 시간 순 정렬
+        const sortedShifts = [...shifts].sort((a, b) =>
+            getMinutesFromTime(a.startTime) - getMinutesFromTime(b.startTime)
+        );
 
-        // 1시간 = 60px 기준
-        const top = startMinutes; // 1분 = 1px
-        const height = duration;
+        // 2. 컬럼 할당 로직
+        const columns: { endTime: number }[] = [];
+        const result = sortedShifts.map(shift => {
+            const startMinutes = getMinutesFromTime(shift.startTime);
+            const endMinutes = getMinutesFromTime(shift.endTime);
 
-        return {
-            top: `${top}px`,
-            height: `${height}px`,
-        };
+            // 들어갈 수 있는 첫 번째 컬럼 찾기
+            let colIndex = columns.findIndex(col => col.endTime <= startMinutes);
+
+            if (colIndex === -1) {
+                // 들어갈 곳이 없으면 새 컬럼 추가
+                colIndex = columns.length;
+                columns.push({ endTime: endMinutes });
+            } else {
+                // 해당 컬럼 업데이트
+                columns[colIndex].endTime = endMinutes;
+            }
+
+            return {
+                shift,
+                colIndex,
+                startMinutes,
+                endMinutes
+            };
+        });
+
+        const totalCols = columns.length;
+        const widthPercent = 100 / (totalCols || 1);
+
+        return result.map(({ shift, colIndex, startMinutes, endMinutes }) => {
+            const colors = workerColorMap[shift.workerId];
+            const colorClass = shift.type === 'regular'
+                ? colors?.regular
+                : colors?.schedule;
+
+            const top = startMinutes;
+            const height = endMinutes - startMinutes;
+
+            return {
+                ...shift,
+                colorClass,
+                style: {
+                    top: `${top}px`,
+                    height: `${height}px`,
+                    width: `${widthPercent}%`,
+                    left: `${colIndex * widthPercent}%`,
+                }
+            };
+        });
     };
-
-
 
     const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -247,6 +287,7 @@ export const WeeklyCalendar = ({
                         {weekDays.map((date, index) => {
                             const isToday = new Date().toDateString() === date.toDateString();
                             const shifts = getShiftsForDate(date);
+                            const layoutedShifts = calculateLayout(shifts);
 
                             return (
                                 <div key={index} className="flex-1 flex flex-col border-r border-gray-100 min-w-[120px]">
@@ -254,7 +295,7 @@ export const WeeklyCalendar = ({
                                     <div className={`h-10 flex items-center justify-center border-b border-gray-100 sticky top-0 bg-white z-10 ${isToday ? 'bg-blue-50' : ''
                                         }`}>
                                         <div className={`text-center ${date.getDay() === 0 ? 'text-red-500' :
-                                            date.getDay() === 6 ? 'text-blue-500' : 'text-gray-700'
+                                                date.getDay() === 6 ? 'text-blue-500' : 'text-gray-700'
                                             }`}>
                                             <span className="text-xs font-medium mr-1">{dayNames[date.getDay()]}</span>
                                             <span className={`text-sm font-bold ${isToday ? 'px-2 py-0.5 bg-blue-500 text-white rounded-full' : ''}`}>
@@ -271,28 +312,20 @@ export const WeeklyCalendar = ({
                                         ))}
 
                                         {/* Shifts */}
-                                        {shifts.map(shift => {
-                                            const colors = workerColorMap[shift.workerId];
-                                            const colorClass = shift.type === 'regular'
-                                                ? colors?.regular
-                                                : colors?.schedule;
-                                            const style = getShiftStyle(shift);
-
-                                            return (
-                                                <div
-                                                    key={shift.id}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        onShiftClick?.(shift, date);
-                                                    }}
-                                                    style={style}
-                                                    className={`absolute left-1 right-1 rounded border p-1 text-xs overflow-hidden cursor-pointer hover:opacity-80 transition-opacity flex flex-col justify-center ${colorClass} shadow-sm z-0`}
-                                                >
-                                                    <div className="font-bold truncate">{shift.workerName}</div>
-                                                    <div className="truncate opacity-90">{shift.startTime}-{shift.endTime}</div>
-                                                </div>
-                                            );
-                                        })}
+                                        {layoutedShifts.map(item => (
+                                            <div
+                                                key={item.id}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onShiftClick?.(item, date);
+                                                }}
+                                                style={item.style}
+                                                className={`absolute rounded border p-1 text-xs overflow-hidden cursor-pointer hover:opacity-80 transition-opacity flex flex-col justify-center ${item.colorClass} shadow-sm z-0`}
+                                            >
+                                                <div className="font-bold truncate">{item.workerName}</div>
+                                                <div className="truncate opacity-90">{item.startTime}-{item.endTime}</div>
+                                            </div>
+                                        ))}
 
                                         {/* Current Time Indicator (if today) */}
                                         {isToday && (
