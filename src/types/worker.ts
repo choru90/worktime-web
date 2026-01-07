@@ -11,10 +11,12 @@ export interface Worker {
 
 export interface WageContract {
     id: string;
+    workerId: string;
     hourlyWage: number;
-    effectiveFrom: string;
-    effectiveTo: string | null;
-    isCurrent: boolean;
+    startDate: string;
+    endDate: string | null;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface WorkerCreateRequest {
