@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { PageContainer } from '../../components/common/PageContainer';
 import { ScheduleFilterBar } from './ScheduleFilterBar';
 import { ScheduleList } from './ScheduleList';
+import { ScheduleCalendar } from './ScheduleCalendar';
 import { ScheduleForm } from './ScheduleForm';
 import { WorkLogEntryModal } from './WorkLogEntryModal';
 import apiClient from '../../lib/apiClient';
@@ -18,6 +19,7 @@ export const SchedulePage = () => {
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedScheduleForWorkLog, setSelectedScheduleForWorkLog] = useState<Schedule | null>(null);
+    const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
 
     // 초기 날짜 범위: 오늘 기준 ±7일
     const getInitialDateRange = () => {
@@ -187,7 +189,36 @@ export const SchedulePage = () => {
     return (
         <PageContainer title="근무 스케줄 관리">
             <div className="mb-4 flex justify-between items-center">
-                <p className="text-gray-600">총 {schedules.length}개</p>
+                <div className="flex items-center gap-4">
+                    <p className="text-gray-600">총 {schedules.length}개</p>
+                    {/* 뷰 모드 전환 버튼 */}
+                    <div className="flex border border-gray-200 rounded-lg overflow-hidden">
+                        <button
+                            onClick={() => setViewMode('calendar')}
+                            className={`px-3 py-1.5 text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === 'calendar'
+                                    ? 'bg-gray-900 text-white'
+                                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                                }`}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            캘린더
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`px-3 py-1.5 text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === 'list'
+                                    ? 'bg-gray-900 text-white'
+                                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                                }`}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                            </svg>
+                            리스트
+                        </button>
+                    </div>
+                </div>
                 <button
                     onClick={() => setShowCreateModal(true)}
                     className="bg-gray-900 hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-lg transition-colors"
@@ -196,20 +227,30 @@ export const SchedulePage = () => {
                 </button>
             </div>
 
-            <ScheduleFilterBar
-                filter={filter}
-                onChange={setFilter}
-                workers={workers}
-            />
+            {/* 리스트 뷰일 때만 필터 표시 */}
+            {viewMode === 'list' && (
+                <ScheduleFilterBar
+                    filter={filter}
+                    onChange={setFilter}
+                    workers={workers}
+                />
+            )}
 
-            <ScheduleList
-                schedules={schedules}
-                onApprove={handleApprove}
-                onReject={handleReject}
-                onWriteWorkLog={handleWriteWorkLog}
-                isLoading={loading}
-                isWorker={!isOwner}
-            />
+            {/* 캘린더 또는 리스트 뷰 */}
+            {viewMode === 'calendar' ? (
+                <ScheduleCalendar
+                    schedules={schedules}
+                />
+            ) : (
+                <ScheduleList
+                    schedules={schedules}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                    onWriteWorkLog={handleWriteWorkLog}
+                    isLoading={loading}
+                    isWorker={!isOwner}
+                />
+            )}
 
             {/* 스케줄 제안 모달 */}
             {showCreateModal && (
