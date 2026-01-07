@@ -6,6 +6,7 @@ export interface Worker {
     active: boolean;
     currentHourlyWage?: number;
     hasAccount?: boolean;
+    userEmail?: string;
 }
 
 export interface WageContract {

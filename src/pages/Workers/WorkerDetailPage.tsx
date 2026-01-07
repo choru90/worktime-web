@@ -13,6 +13,7 @@ export const WorkerDetailPage = () => {
     const navigate = useNavigate();
     const [worker, setWorker] = useState<Worker | null>(null);
     const [contracts, setContracts] = useState<WageContract[]>([]);
+    const [currentWage, setCurrentWage] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [showEditModal, setShowEditModal] = useState(false);
 
@@ -21,11 +22,14 @@ export const WorkerDetailPage = () => {
 
         try {
             setLoading(true);
-            const [workerRes, contractsRes] = await Promise.all([
-                apiClient.get<Worker>(`/workers/${workerId}`),
+            const [workerDetailRes, contractsRes] = await Promise.all([
+                apiClient.get<any>(`/workers/${workerId}`),
                 apiClient.get<WageContract[]>(`/workers/${workerId}/wage-contracts`),
             ]);
-            setWorker(workerRes.data);
+
+            // WorkerDetailResponse 구조: { worker: WorkerResponse, currentWage, wageHistory }
+            setWorker(workerDetailRes.data.worker);
+            setCurrentWage(workerDetailRes.data.currentWage?.hourlyWage || null);
             setContracts(contractsRes.data);
         } catch (error) {
             console.error('Failed to fetch worker data:', error);
@@ -99,6 +103,12 @@ export const WorkerDetailPage = () => {
                         <p className="text-base font-medium">{worker.phoneNumber}</p>
                     </div>
                     <div>
+                        <label className="text-sm text-gray-500">이메일</label>
+                        <p className="text-base font-medium">
+                            {worker.userEmail || <span className="text-gray-400">미가입</span>}
+                        </p>
+                    </div>
+                    <div>
                         <label className="text-sm text-gray-500">상태</label>
                         <p className="text-base font-medium">
                             <span
@@ -114,8 +124,8 @@ export const WorkerDetailPage = () => {
                     <div>
                         <label className="text-sm text-gray-500">현재 시급</label>
                         <p className="text-base font-medium">
-                            {worker.currentHourlyWage
-                                ? `${worker.currentHourlyWage.toLocaleString()}원`
+                            {currentWage
+                                ? `${currentWage.toLocaleString()}원`
                                 : '-'}
                         </p>
                     </div>
@@ -133,7 +143,11 @@ export const WorkerDetailPage = () => {
             {/* 시급 계약 섹션 */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
                 <h3 className="text-lg font-semibold mb-4">시급 계약 내역</h3>
-                <WageContractList contracts={contracts} />
+                <WageContractList
+                    contracts={contracts}
+                    workerId={workerId!}
+                    onContractUpdated={fetchWorkerData}
+                />
             </div>
 
             {/* 새 시급 계약 추가 */}
