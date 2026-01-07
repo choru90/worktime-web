@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { regularShiftApi } from '../../api/storeApi';
-import { DayOfWeek, DAY_OF_WEEK_LABELS } from '../../types/store';
+import { DayOfWeek, DAY_OF_WEEK_SHORT } from '../../types/store';
 import { Worker } from '../../types/worker';
 
 interface RegularShiftModalProps {
@@ -14,11 +14,31 @@ const DAYS_OF_WEEK: DayOfWeek[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY',
 
 export const RegularShiftModal = ({ storeId, workers, onClose, onCreated }: RegularShiftModalProps) => {
     const [workerId, setWorkerId] = useState('');
-    const [dayOfWeek, setDayOfWeek] = useState<DayOfWeek>('MONDAY');
+    const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([]);
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('18:00');
     const [shiftName, setShiftName] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const toggleDay = (day: DayOfWeek) => {
+        setSelectedDays(prev =>
+            prev.includes(day)
+                ? prev.filter(d => d !== day)
+                : [...prev, day]
+        );
+    };
+
+    const selectAllWeekdays = () => {
+        setSelectedDays(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY']);
+    };
+
+    const selectAllDays = () => {
+        setSelectedDays([...DAYS_OF_WEEK]);
+    };
+
+    const clearDays = () => {
+        setSelectedDays([]);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,15 +48,23 @@ export const RegularShiftModal = ({ storeId, workers, onClose, onCreated }: Regu
             return;
         }
 
+        if (selectedDays.length === 0) {
+            alert('최소 하나의 요일을 선택해주세요.');
+            return;
+        }
+
         try {
             setLoading(true);
-            await regularShiftApi.createRegularShift(storeId, {
-                workerId,
-                dayOfWeek,
-                startTime,
-                endTime,
-                shiftName: shiftName || undefined,
-            });
+            // 선택된 요일별로 각각 고정 근무 생성
+            for (const dayOfWeek of selectedDays) {
+                await regularShiftApi.createRegularShift(storeId, {
+                    workerId,
+                    dayOfWeek,
+                    startTime,
+                    endTime,
+                    shiftName: shiftName || undefined,
+                });
+            }
             onCreated();
         } catch (error) {
             console.error('Failed to create shift:', error);
@@ -71,22 +99,59 @@ export const RegularShiftModal = ({ storeId, workers, onClose, onCreated }: Regu
                         </select>
                     </div>
 
-                    {/* 요일 */}
+                    {/* 요일 - 체크박스 */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            요일 *
-                        </label>
-                        <select
-                            value={dayOfWeek}
-                            onChange={(e) => setDayOfWeek(e.target.value as DayOfWeek)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        >
+                        <div className="flex justify-between items-center mb-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                                요일 * ({selectedDays.length}개 선택)
+                            </label>
+                            <div className="flex gap-1">
+                                <button
+                                    type="button"
+                                    onClick={selectAllWeekdays}
+                                    className="text-xs px-2 py-1 text-blue-600 hover:bg-blue-50 rounded"
+                                >
+                                    평일
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={selectAllDays}
+                                    className="text-xs px-2 py-1 text-blue-600 hover:bg-blue-50 rounded"
+                                >
+                                    전체
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={clearDays}
+                                    className="text-xs px-2 py-1 text-gray-500 hover:bg-gray-100 rounded"
+                                >
+                                    초기화
+                                </button>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
                             {DAYS_OF_WEEK.map(day => (
-                                <option key={day} value={day}>
-                                    {DAY_OF_WEEK_LABELS[day]}
-                                </option>
+                                <button
+                                    key={day}
+                                    type="button"
+                                    onClick={() => toggleDay(day)}
+                                    className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${selectedDays.includes(day)
+                                            ? day === 'SUNDAY'
+                                                ? 'bg-red-500 text-white border-red-500'
+                                                : day === 'SATURDAY'
+                                                    ? 'bg-blue-500 text-white border-blue-500'
+                                                    : 'bg-gray-900 text-white border-gray-900'
+                                            : day === 'SUNDAY'
+                                                ? 'text-red-500 border-gray-300 hover:bg-red-50'
+                                                : day === 'SATURDAY'
+                                                    ? 'text-blue-500 border-gray-300 hover:bg-blue-50'
+                                                    : 'text-gray-700 border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    {DAY_OF_WEEK_SHORT[day]}
+                                </button>
                             ))}
-                        </select>
+                        </div>
                     </div>
 
                     {/* 시작/종료 시간 */}
@@ -142,10 +207,10 @@ export const RegularShiftModal = ({ storeId, workers, onClose, onCreated }: Regu
                         </button>
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || selectedDays.length === 0}
                             className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50"
                         >
-                            {loading ? '저장 중...' : '저장'}
+                            {loading ? '저장 중...' : `저장 (${selectedDays.length}개)`}
                         </button>
                     </div>
                 </form>
