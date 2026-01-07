@@ -16,6 +16,8 @@ export const WorkerDetailPage = () => {
     const [currentWage, setCurrentWage] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showResignModal, setShowResignModal] = useState(false);
+    const [resignDate, setResignDate] = useState('');
 
     const fetchWorkerData = async () => {
         if (!workerId) return;
@@ -61,6 +63,32 @@ export const WorkerDetailPage = () => {
         fetchWorkerData();
     };
 
+    const handleResignClick = () => {
+        setResignDate(new Date().toISOString().split('T')[0]);
+        setShowResignModal(true);
+    };
+
+    const handleResign = async () => {
+        if (!workerId || !resignDate) return;
+
+        if (!window.confirm('퇴사 처리 시 복구할 수 없습니다. 계속하시겠습니까?')) {
+            return;
+        }
+
+        try {
+            await apiClient.post(`/workers/${workerId}/resign`, null, {
+                params: { resignDate }
+            });
+            alert('퇴사 처리가 완료되었습니다.');
+            setShowResignModal(false);
+            fetchWorkerData();
+        } catch (error: any) {
+            console.error('Failed to resign worker:', error);
+            const message = error.response?.data?.message || '퇴사 처리에 실패했습니다.';
+            alert(message);
+        }
+    };
+
     if (loading) {
         return (
             <PageContainer title="알바생 상세">
@@ -85,12 +113,22 @@ export const WorkerDetailPage = () => {
             <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
                 <div className="flex justify-between items-start mb-4">
                     <h3 className="text-lg font-semibold">기본 정보</h3>
-                    <button
-                        onClick={() => setShowEditModal(true)}
-                        className="text-gray-700 hover:text-gray-900 font-medium"
-                    >
-                        수정
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowEditModal(true)}
+                            className="text-gray-700 hover:text-gray-900 font-medium"
+                        >
+                            수정
+                        </button>
+                        {worker.active && (
+                            <button
+                                onClick={handleResignClick}
+                                className="text-red-600 hover:text-red-800 font-medium"
+                            >
+                                퇴사 처리
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -172,6 +210,55 @@ export const WorkerDetailPage = () => {
                             onSubmit={handleUpdate}
                             onCancel={() => setShowEditModal(false)}
                         />
+                    </div>
+                </div>
+            )
+            }
+
+            {/* 퇴사 처리 모달 */}
+            {showResignModal && worker && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                        <h3 className="text-lg font-semibold mb-4">퇴사 처리</h3>
+
+                        <div className="mb-4">
+                            <p className="text-sm text-gray-600 mb-2">
+                                알바생: <strong>{worker.name}</strong>
+                            </p>
+                            <p className="text-sm text-red-600 mb-4">
+                                ⚠️ 퇴사 처리 시 복구할 수 없습니다
+                            </p>
+
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                퇴사일
+                            </label>
+                            <input
+                                type="date"
+                                value={resignDate}
+                                onChange={(e) => setResignDate(e.target.value)}
+                                max={new Date().toISOString().split('T')[0]}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                퇴사일은 오늘 이전이어야 합니다
+                            </p>
+                        </div>
+
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setShowResignModal(false)}
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={handleResign}
+                                disabled={!resignDate}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400"
+                            >
+                                퇴사 처리
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
