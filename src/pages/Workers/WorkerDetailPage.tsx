@@ -146,7 +146,6 @@ export const WorkerDetailPage = () => {
                 <WageContractList
                     contracts={contracts}
                     workerId={workerId!}
-                    onContractUpdated={fetchWorkerData}
                 />
             </div>
 
