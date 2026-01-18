@@ -236,11 +236,10 @@ export const WorkerDetailPage = () => {
                                 type="date"
                                 value={resignDate}
                                 onChange={(e) => setResignDate(e.target.value)}
-                                max={new Date().toISOString().split('T')[0]}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                                퇴사일은 오늘 이전이어야 합니다
+                                시급 계약 시작일 이전이면 해당 계약은 유지됩니다
                             </p>
                         </div>
 

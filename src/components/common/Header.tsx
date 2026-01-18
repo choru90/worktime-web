@@ -1,9 +1,16 @@
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { useNotifications } from '../../hooks/useNotifications';
+import { NotificationBadge } from '../Notification/NotificationBadge';
+import { NotificationDropdown } from '../Notification/NotificationDropdown';
 
 interface HeaderProps { }
 
 export const Header = ({ }: HeaderProps) => {
     const { logout, user } = useAuth();
+    const { notifications, unreadCount, markAsRead, markAllAsRead, refresh } = useNotifications();
+    const [showNotifications, setShowNotifications] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     const handleLogout = () => {
         if (window.confirm('로그아웃 하시겠습니까?')) {
@@ -14,6 +21,34 @@ export const Header = ({ }: HeaderProps) => {
     const getRoleLabel = (role: string) => {
         return role === 'OWNER' ? '사장님' : '알바생';
     };
+
+    const toggleNotifications = () => {
+        setShowNotifications(prev => !prev);
+    };
+
+    // 드롭다운 외부 클릭 시 닫기
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setShowNotifications(false);
+            }
+        };
+
+        if (showNotifications) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showNotifications]);
+
+    // 드롭다운이 열릴 때 알림 새로고침
+    useEffect(() => {
+        if (showNotifications) {
+            refresh();
+        }
+    }, [showNotifications, refresh]);
 
     return (
         <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6">
@@ -30,6 +65,26 @@ export const Header = ({ }: HeaderProps) => {
                         )}
                     </div>
                 )}
+
+                {/* 알림 뱃지 */}
+                <div className="relative" ref={dropdownRef}>
+                    <NotificationBadge
+                        count={unreadCount}
+                        onClick={toggleNotifications}
+                    />
+
+                    {/* 알림 드롭다운 */}
+                    {showNotifications && (
+                        <NotificationDropdown
+                            notifications={notifications}
+                            unreadCount={unreadCount}
+                            onClose={() => setShowNotifications(false)}
+                            onMarkAsRead={markAsRead}
+                            onMarkAllAsRead={markAllAsRead}
+                        />
+                    )}
+                </div>
+
                 <button
                     onClick={handleLogout}
                     className="bg-gray-900 hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-lg transition-colors"
