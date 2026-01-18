@@ -2,10 +2,9 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageContainer } from '../../components/common/PageContainer';
 import { DashboardSummarySection } from './sections/DashboardSummarySection';
-import { DashboardActionsSection } from './sections/DashboardActionsSection';
 import { DashboardTodaySchedulesSection } from './sections/DashboardTodaySchedulesSection';
 import { DashboardAttendanceSection } from './sections/DashboardAttendanceSection';
-import { DashboardTopWorkersSection } from './sections/DashboardTopWorkersSection';
+import { DashboardPendingApprovalsSection } from './sections/DashboardPendingApprovalsSection';
 import { WorkerDashboard } from './WorkerDashboard';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -50,15 +49,8 @@ export const DashboardPage = () => {
             {/* Main Layout - Grid */}
             <div className="flex flex-col gap-6">
 
-                {/* 1. Top Section: Actions & Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2">
-                        <DashboardSummarySection date={currentDate} />
-                    </div>
-                    <div className="lg:col-span-1" id="dashboard-actions">
-                        <DashboardActionsSection date={currentDate} />
-                    </div>
-                </div>
+                {/* 1. Top Section: Summary (전체 너비로 확장) */}
+                <DashboardSummarySection date={currentDate} />
 
                 {/* 2. Middle Section: Attendance & Schedules */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -68,10 +60,8 @@ export const DashboardPage = () => {
                     </div>
                 </div>
 
-                {/* 3. Bottom Section: Top Workers */}
-                <div className="grid grid-cols-1">
-                    <DashboardTopWorkersSection date={currentDate} />
-                </div>
+                {/* 3. Bottom Section: Pending Approvals (신규 추가) */}
+                <DashboardPendingApprovalsSection date={currentDate} />
             </div>
         </PageContainer>
     );
