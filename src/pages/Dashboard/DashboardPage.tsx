@@ -61,7 +61,9 @@ export const DashboardPage = () => {
                 </div>
 
                 {/* 3. Bottom Section: Pending Approvals (신규 추가) */}
-                <DashboardPendingApprovalsSection date={currentDate} />
+                <div id="dashboard-actions">
+                    <DashboardPendingApprovalsSection date={currentDate} />
+                </div>
             </div>
         </PageContainer>
     );
