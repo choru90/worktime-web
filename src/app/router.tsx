@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, useLocation } from 'react-router-dom';
 import { LoginPage } from '../pages/Login/LoginPage';
 import { SignupPage } from '../pages/Signup/SignupPage';
 import { DashboardPage } from '../pages/Dashboard/DashboardPage';
@@ -10,6 +10,15 @@ import { PayrollPage } from '../pages/Payroll/PayrollPage';
 import { StoreSettingsPage } from '../pages/Store/StoreSettingsPage';
 import { MainLayout } from '../layouts/MainLayout';
 import { PrivateRoute, PublicRoute } from './PrivateRoute';
+
+const AttendanceRedirect = () => {
+    const location = useLocation();
+    return <Navigate to={`/worklogs${location.search}`} replace />;
+};
+
+const ScheduleRedirect = () => {
+    return <Navigate to="/schedule" replace />;
+};
 
 export const router = createBrowserRouter([
     {
@@ -101,6 +110,14 @@ export const router = createBrowserRouter([
                 </MainLayout>
             </PrivateRoute>
         ),
+    },
+    {
+        path: '/owner/attendance',
+        element: <AttendanceRedirect />,
+    },
+    {
+        path: '/owner/schedules/:scheduleId',
+        element: <ScheduleRedirect />,
     },
     {
         path: '/store/settings',
