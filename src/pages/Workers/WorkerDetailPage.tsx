@@ -7,6 +7,8 @@ import { WageContractForm } from './WageContractForm';
 import { InviteCodeSection } from './InviteCodeSection';
 import apiClient from '../../lib/apiClient';
 import { Worker, WageContract, WorkerUpdateRequest } from '../../types/worker';
+import { storeApi } from '../../api/storeApi';
+import { Store } from '../../types/store';
 
 export const WorkerDetailPage = () => {
     const { workerId } = useParams<{ workerId: string }>();
@@ -18,6 +20,7 @@ export const WorkerDetailPage = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showResignModal, setShowResignModal] = useState(false);
     const [resignDate, setResignDate] = useState('');
+    const [storeList, setStoreList] = useState<Store[]>([]);
 
     const fetchWorkerData = async () => {
         if (!workerId) return;
@@ -42,8 +45,18 @@ export const WorkerDetailPage = () => {
         }
     };
 
+    const fetchStoreList = async () => {
+        try {
+            const storeData = await storeApi.getStores();
+            setStoreList(storeData);
+        } catch (error) {
+            console.error('Failed to fetch stores:', error);
+        }
+    };
+
     useEffect(() => {
         fetchWorkerData();
+        fetchStoreList();
     }, [workerId]);
 
     const handleUpdate = async (values: WorkerUpdateRequest) => {
@@ -206,7 +219,9 @@ export const WorkerDetailPage = () => {
                             initialValues={{
                                 name: worker.name,
                                 phoneNumber: worker.phoneNumber,
+                                storeId: worker.storeId || '',
                             }}
+                            storeList={storeList}
                             onSubmit={handleUpdate}
                             onCancel={() => setShowEditModal(false)}
                         />

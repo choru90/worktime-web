@@ -30,6 +30,7 @@ export interface WorkerCreateRequest {
 export interface WorkerUpdateRequest {
     name: string;
     phoneNumber: string;
+    storeId?: string;
 }
 
 export interface WageContractCreateRequest {
