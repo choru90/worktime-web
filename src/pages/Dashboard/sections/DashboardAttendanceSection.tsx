@@ -40,7 +40,7 @@ export const DashboardAttendanceSection: React.FC<Props> = ({ date }) => {
             navigate('/schedule'); // Fallback
         } else {
             // navigate to attendance page
-            navigate(`/owner/attendance?date=${date}`);
+            navigate(`/worklogs?date=${date}`);
         }
     };
 

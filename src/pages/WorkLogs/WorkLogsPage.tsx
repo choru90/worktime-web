@@ -7,10 +7,12 @@ import apiClient from '../../lib/apiClient';
 import { WorkLog, WorkLogFilter } from '../../types/worklog';
 import { Worker } from '../../types/worker';
 import { useAuth } from '../../hooks/useAuth';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 
 export const WorkLogsPage = () => {
     const { user } = useAuth();
+    const [searchParams] = useSearchParams();
+    const queryDate = searchParams.get('date');
 
     // 알바생은 /my/worklogs로 리다이렉트
     if (user?.role === 'WORKER') {
@@ -27,6 +29,14 @@ export const WorkLogsPage = () => {
 
     // 초기 날짜 범위: 오늘 기준 ±7일, 상태: COMPLETED (검수 대기)
     const getInitialFilter = () => {
+        if (queryDate) {
+            return {
+                fromDate: queryDate,
+                toDate: queryDate,
+                status: '',
+            };
+        }
+
         const today = new Date();
         const fromDate = new Date(today);
         fromDate.setDate(today.getDate() - 7);

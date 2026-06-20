@@ -1,34 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../lib/apiClient';
 import { Loading } from '../../../components/common/Loading';
 import { ErrorState } from '../../../components/common/ErrorState';
+import { dashboardApi, ActionItem } from '../../../api/dashboardApi';
 
 interface Props {
     date: string;
 }
 
-interface PendingSchedule {
-    id: string;
-    workerName: string;
-    workerId: string;
-    startAtUtc: string;
-    endAtUtc: string;
-    status: string;
-}
-
-interface PendingWorkLog {
-    id: string;
-    workerName: string;
-    workerId: string;
-    scheduleDate: string;
-    checkInTime: string | null;
-    checkOutTime: string | null;
-    status: string;
-}
-
 export const DashboardPendingApprovalsSection: React.FC<Props> = ({ date }) => {
-    const [pendingSchedules, setPendingSchedules] = useState<PendingSchedule[]>([]);
-    const [pendingWorkLogs, setPendingWorkLogs] = useState<PendingWorkLog[]>([]);
+    const navigate = useNavigate();
+    const [actionList, setActionList] = useState<ActionItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -37,26 +20,11 @@ export const DashboardPendingApprovalsSection: React.FC<Props> = ({ date }) => {
         try {
             setLoading(true);
             setError(null);
-
-            // 승인 대기 스케줄 조회 (REQUESTED_BY_WORKER 상태)
-            const schedulesResponse = await apiClient.get('/schedules', {
-                params: {
-                    status: 'REQUESTED_BY_WORKER'
-                }
-            });
-            setPendingSchedules(schedulesResponse.data.schedules || []);
-
-            // 승인 대기 근무 기록 조회 (COMPLETED 상태 = 검수 대기)
-            const workLogsResponse = await apiClient.get('/work-logs', {
-                params: {
-                    status: 'COMPLETED'
-                }
-            });
-            setPendingWorkLogs(workLogsResponse.data || []);
-
+            const dashboardActionResponse = await dashboardApi.getActions({ date });
+            setActionList(dashboardActionResponse.data.items || []);
         } catch (err) {
-            console.error('Failed to fetch pending approvals', err);
-            setError('승인 대기 항목을 불러오는데 실패했습니다.');
+            console.error('Failed to fetch dashboard actions', err);
+            setError('확인 필요 항목을 불러오는데 실패했습니다.');
         } finally {
             setLoading(false);
         }
@@ -98,62 +66,11 @@ export const DashboardPendingApprovalsSection: React.FC<Props> = ({ date }) => {
         }
     };
 
-    const handleWorkLogApprove = async (workLogId: string) => {
-        if (!window.confirm('이 근무 기록을 승인하시겠습니까?')) return;
-
-        try {
-            setActionLoading(workLogId);
-            await apiClient.post(`/work-logs/${workLogId}/confirm`);
-            await fetchData();
-            alert('근무 기록을 승인했습니다.');
-        } catch (err: any) {
-            console.error('Failed to approve work log', err);
-            alert(err.response?.data?.message || '근무 기록 승인에 실패했습니다.');
-        } finally {
-            setActionLoading(null);
-        }
-    };
-
-    const handleWorkLogReject = async (workLogId: string) => {
-        if (!window.confirm('이 근무 기록을 거절하시겠습니까?')) return;
-
-        try {
-            setActionLoading(workLogId);
-            await apiClient.post(`/work-logs/${workLogId}/reject`);
-            await fetchData();
-            alert('근무 기록을 거절했습니다.');
-        } catch (err: any) {
-            console.error('Failed to reject work log', err);
-            alert(err.response?.data?.message || '근무 기록 거절에 실패했습니다.');
-        } finally {
-            setActionLoading(null);
-        }
-    };
-
-    const formatDateTime = (utcDateStr: string) => {
-        const date = new Date(utcDateStr);
-        return date.toLocaleString('ko-KR', {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
-    const formatTime = (utcDateStr: string | null) => {
-        if (!utcDateStr) return '-';
-        const date = new Date(utcDateStr);
-        return date.toLocaleTimeString('ko-KR', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
     if (loading) {
         return (
             <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-lg font-semibold mb-4">승인 대기</h2>
-                <Loading message="승인 대기 항목을 불러오는 중..." />
+                <h2 className="text-lg font-semibold mb-4 text-gray-900">확인 필요</h2>
+                <Loading message="확인 필요 항목을 불러오는 중..." />
             </div>
         );
     }
@@ -161,18 +78,18 @@ export const DashboardPendingApprovalsSection: React.FC<Props> = ({ date }) => {
     if (error) {
         return (
             <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-lg font-semibold mb-4">승인 대기</h2>
+                <h2 className="text-lg font-semibold mb-4 text-gray-900">확인 필요</h2>
                 <ErrorState message={error} onRetry={fetchData} />
             </div>
         );
     }
 
-    const totalPending = pendingSchedules.length + pendingWorkLogs.length;
+    const totalPending = actionList.length;
 
     return (
         <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">승인 대기</h2>
+                <h2 className="text-lg font-semibold text-gray-900">확인 필요</h2>
                 {totalPending > 0 && (
                     <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-full">
                         {totalPending}
@@ -183,96 +100,70 @@ export const DashboardPendingApprovalsSection: React.FC<Props> = ({ date }) => {
             {totalPending === 0 ? (
                 <div className="text-center py-12">
                     <span className="text-4xl mb-3 block">✅</span>
-                    <h3 className="text-gray-900 font-medium mb-1">승인 대기 항목이 없습니다</h3>
-                    <p className="text-gray-500 text-sm">모든 승인이 완료되었습니다.</p>
+                    <h3 className="text-gray-900 font-medium mb-1">확인 필요 항목이 없습니다</h3>
+                    <p className="text-gray-500 text-sm">모든 확인이 완료되었습니다.</p>
                 </div>
             ) : (
-                <div className="space-y-6">
-                    {/* 스케줄 승인 대기 */}
-                    {pendingSchedules.length > 0 && (
-                        <div>
-                            <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                                📅 스케줄 승인 대기
-                                <span className="bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded-full">
-                                    {pendingSchedules.length}
-                                </span>
-                            </h3>
-                            <div className="space-y-2">
-                                {pendingSchedules.map((schedule) => (
-                                    <div
-                                        key={schedule.id}
-                                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
-                                    >
-                                        <div className="flex-1">
-                                            <div className="font-medium text-gray-900">{schedule.workerName}</div>
-                                            <div className="text-sm text-gray-600">
-                                                {formatDateTime(schedule.startAtUtc)} - {formatTime(schedule.endAtUtc)}
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => handleScheduleApprove(schedule.id)}
-                                                disabled={actionLoading === schedule.id}
-                                                className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md transition-colors disabled:bg-gray-400"
-                                            >
-                                                {actionLoading === schedule.id ? '처리중...' : '승인'}
-                                            </button>
-                                            <button
-                                                onClick={() => handleScheduleReject(schedule.id)}
-                                                disabled={actionLoading === schedule.id}
-                                                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md transition-colors disabled:bg-gray-400"
-                                            >
-                                                거절
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                <div className="space-y-4">
+                    {actionList.map((actionListItem) => {
+                        const isScheduleApproval = actionListItem.type === 'PENDING_SCHEDULE_APPROVAL';
+                        const targetId = actionListItem.target.targetId;
 
-                    {/* 근무 기록 승인 대기 */}
-                    {pendingWorkLogs.length > 0 && (
-                        <div>
-                            <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                                🕐 근무 기록 승인 대기
-                                <span className="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full">
-                                    {pendingWorkLogs.length}
-                                </span>
-                            </h3>
-                            <div className="space-y-2">
-                                {pendingWorkLogs.map((workLog) => (
-                                    <div
-                                        key={workLog.id}
-                                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
-                                    >
-                                        <div className="flex-1">
-                                            <div className="font-medium text-gray-900">{workLog.workerName}</div>
-                                            <div className="text-sm text-gray-600">
-                                                {workLog.scheduleDate} | 출근: {formatTime(workLog.checkInTime)} / 퇴근: {formatTime(workLog.checkOutTime)}
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2">
+                        return (
+                            <div
+                                key={actionListItem.id}
+                                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                            >
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                                            isScheduleApproval
+                                                ? 'bg-blue-100 text-blue-700'
+                                                : actionListItem.type === 'MISSING_CHECKIN'
+                                                ? 'bg-orange-100 text-orange-700'
+                                                : 'bg-red-100 text-red-700'
+                                        }`}>
+                                            {actionListItem.title}
+                                        </span>
+                                        <span className="text-xs text-gray-400">
+                                            {new Date(actionListItem.createdAt).toLocaleDateString('ko-KR', {
+                                                month: 'short',
+                                                day: 'numeric'
+                                            })}
+                                        </span>
+                                    </div>
+                                    <div className="font-medium text-gray-900">{actionListItem.message}</div>
+                                </div>
+                                <div className="flex gap-2">
+                                    {isScheduleApproval ? (
+                                        <>
                                             <button
-                                                onClick={() => handleWorkLogApprove(workLog.id)}
-                                                disabled={actionLoading === workLog.id}
+                                                onClick={() => handleScheduleApprove(targetId)}
+                                                disabled={actionLoading === targetId}
                                                 className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md transition-colors disabled:bg-gray-400"
                                             >
-                                                {actionLoading === workLog.id ? '처리중...' : '승인'}
+                                                {actionLoading === targetId ? '처리중...' : '승인'}
                                             </button>
                                             <button
-                                                onClick={() => handleWorkLogReject(workLog.id)}
-                                                disabled={actionLoading === workLog.id}
+                                                onClick={() => handleScheduleReject(targetId)}
+                                                disabled={actionLoading === targetId}
                                                 className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md transition-colors disabled:bg-gray-400"
                                             >
                                                 거절
                                             </button>
-                                        </div>
-                                    </div>
-                                ))}
+                                        </>
+                                    ) : (
+                                        <button
+                                            onClick={() => navigate(actionListItem.target.deepLink)}
+                                            className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-md transition-colors"
+                                        >
+                                            이동
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        );
+                    })}
                 </div>
             )}
         </div>

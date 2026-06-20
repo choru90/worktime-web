@@ -78,20 +78,30 @@ export interface AttendanceSummaryResponse {
 }
 
 export interface ActionTarget {
-    type: string;
-    id: string;
-    deepLink?: string;
+    targetType: 'SCHEDULE' | 'ATTENDANCE' | 'WORKER' | 'WAGE_CONTRACT';
+    targetId: string;
+    deepLink: string;
+}
+
+export interface ActionMeta {
+    workerId: string;
+    workerName: string;
+    scheduledStartAt?: string;
+    scheduledEndAt?: string;
+    checkedInAt?: string;
+    checkedOutAt?: string;
+    contractEndDate?: string;
 }
 
 export interface ActionItem {
     id: string;
-    type: string; // 'PENDING_SCHEDULE_APPROVAL', 'MISSING_CHECKIN', 'MISSING_CHECKOUT'
+    type: 'PENDING_SCHEDULE_APPROVAL' | 'MISSING_CHECKIN' | 'MISSING_CHECKOUT' | string;
     title: string;
     message: string;
-    priority: 'HIGH' | 'MEDIUM' | 'LOW';
+    priority: number;
     target: ActionTarget;
     createdAt: string;
-    isDismissible: boolean;
+    meta: ActionMeta;
 }
 
 export interface ActionListResponse {
