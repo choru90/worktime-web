@@ -23,13 +23,13 @@ export const StoreSettingsPage = () => {
     // 초기 데이터 로드
     useEffect(() => {
         fetchStores();
-        fetchWorkers();
     }, []);
 
-    // 영업장 선택 시 고정 근무 로드
+    // 영업장 선택 시 고정 근무 및 소속 Worker 로드
     useEffect(() => {
         if (selectedStore) {
             fetchRegularShifts(selectedStore.id);
+            fetchWorkers(selectedStore.id);
         }
     }, [selectedStore]);
 
@@ -48,9 +48,13 @@ export const StoreSettingsPage = () => {
         }
     };
 
-    const fetchWorkers = async () => {
+    const fetchWorkers = async (storeId?: string) => {
         try {
-            const response = await apiClient.get<Worker[]>('/workers');
+            const params: Record<string, string> = {};
+            if (storeId) {
+                params.storeId = storeId;
+            }
+            const response = await apiClient.get<Worker[]>('/workers', { params });
             setWorkers(response.data);
         } catch (error) {
             console.error('Failed to fetch workers:', error);

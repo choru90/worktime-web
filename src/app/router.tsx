@@ -1,20 +1,15 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoginPage } from '../pages/Login/LoginPage';
 import { SignupPage } from '../pages/Signup/SignupPage';
-import { WorkerSignupPage } from '../pages/Signup/WorkerSignupPage';
 import { DashboardPage } from '../pages/Dashboard/DashboardPage';
 import { WorkersPage } from '../pages/Workers/WorkersPage';
 import { WorkerDetailPage } from '../pages/Workers/WorkerDetailPage';
 import { SchedulePage } from '../pages/Schedule/SchedulePage';
 import { WorkLogsPage } from '../pages/WorkLogs/WorkLogsPage';
-import { MyWorkLogsPage } from '../pages/WorkLogs/MyWorkLogsPage';
 import { PayrollPage } from '../pages/Payroll/PayrollPage';
-import { WorkerPayrollDetailPage } from '../pages/Payroll/WorkerPayrollDetailPage';
-import { MyPayrollPage } from '../pages/Payroll/MyPayrollPage';
 import { StoreSettingsPage } from '../pages/Store/StoreSettingsPage';
 import { MainLayout } from '../layouts/MainLayout';
 import { PrivateRoute, PublicRoute } from './PrivateRoute';
-import { MySchedulesPage } from '../pages/Schedule/MySchedulesPage';
 
 export const router = createBrowserRouter([
     {
@@ -34,14 +29,6 @@ export const router = createBrowserRouter([
         element: (
             <PublicRoute>
                 <SignupPage />
-            </PublicRoute>
-        ),
-    },
-    {
-        path: '/signup/worker',
-        element: (
-            <PublicRoute>
-                <WorkerSignupPage />
             </PublicRoute>
         ),
     },
@@ -96,61 +83,11 @@ export const router = createBrowserRouter([
         ),
     },
     {
-        path: '/my/worklogs',
-        element: (
-            <PrivateRoute>
-                <MainLayout>
-                    <MyWorkLogsPage />
-                </MainLayout>
-            </PrivateRoute>
-        ),
-    },
-    {
-        path: '/my/schedules',
-        element: (
-            <PrivateRoute>
-                <MainLayout>
-                    <MySchedulesPage />
-                </MainLayout>
-            </PrivateRoute>
-        ),
-    },
-    {
         path: '/payroll',
         element: (
             <PrivateRoute>
                 <MainLayout>
                     <PayrollPage />
-                </MainLayout>
-            </PrivateRoute>
-        ),
-    },
-    {
-        path: '/payroll/workers/:workerId',
-        element: (
-            <PrivateRoute>
-                <MainLayout>
-                    <WorkerPayrollDetailPage />
-                </MainLayout>
-            </PrivateRoute>
-        ),
-    },
-    {
-        path: '/my/payroll',
-        element: (
-            <PrivateRoute>
-                <MainLayout>
-                    <MyPayrollPage />
-                </MainLayout>
-            </PrivateRoute>
-        ),
-    },
-    {
-        path: '/my/payroll',
-        element: (
-            <PrivateRoute>
-                <MainLayout>
-                    <MyPayrollPage />
                 </MainLayout>
             </PrivateRoute>
         ),

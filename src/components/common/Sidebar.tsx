@@ -1,29 +1,17 @@
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
 
 interface SidebarProps { }
 
-const ownerMenuItems = [
+const menuItems = [
     { path: '/dashboard', label: '대시보드', icon: '📊' },
     { path: '/store/settings', label: '영업장 설정', icon: '🏪' },
-    { path: '/workers', label: '알바생 관리', icon: '👥' },
-    { path: '/schedule', label: '스케줄', icon: '📅' },
-    { path: '/worklogs', label: '근무 기록', icon: '⏰' },
-    { path: '/payroll', label: '급여', icon: '💰' },
-];
-
-const workerMenuItems = [
-    { path: '/dashboard', label: '대시보드', icon: '📊' },
-    { path: '/schedule', label: '내 스케줄', icon: '📅' },
-    { path: '/worklogs', label: '내 근무 기록', icon: '⏰' },
-    { path: '/payroll', label: '내 급여', icon: '💰' },
+    { path: '/workers', label: '계약 관리', icon: '👥' },
+    { path: '/schedule', label: '스케줄 관리', icon: '📅' },
+    { path: '/worklogs', label: '출결 관리', icon: '⏰' },
+    { path: '/payroll', label: '급여 관리', icon: '💰' },
 ];
 
 export const Sidebar = ({ }: SidebarProps) => {
-    const { user } = useAuth();
-
-    const menuItems = user?.role === 'OWNER' ? ownerMenuItems : workerMenuItems;
-
     return (
         <aside className="w-64 bg-white border-r border-gray-200 min-h-screen">
             {/* 로고 영역 */}

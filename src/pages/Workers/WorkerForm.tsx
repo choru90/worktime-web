@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { WorkerCreateRequest, WorkerUpdateRequest } from '../../types/worker';
+import { Store } from '../../types/store';
 
 interface WorkerFormProps {
     mode: 'create' | 'edit';
@@ -8,14 +9,17 @@ interface WorkerFormProps {
     ?: {
         name: string;
         phoneNumber: string;
+        storeId?: string;
     };
+    storeList?: Store[];
     onSubmit: (values: WorkerCreateRequest | WorkerUpdateRequest) => Promise<void>;
     onCancel: () => void;
 }
 
 export const WorkerForm = ({
     mode,
-    initialValues = { name: '', phoneNumber: '' },
+    initialValues = { name: '', phoneNumber: '', storeId: '' },
+    storeList = [],
     onSubmit,
     onCancel,
 }: WorkerFormProps) => {
@@ -37,9 +41,15 @@ export const WorkerForm = ({
             return;
         }
 
+        const submitData: WorkerCreateRequest | WorkerUpdateRequest = {
+            name: formData.name,
+            phoneNumber: formData.phoneNumber,
+            ...(formData.storeId ? { storeId: formData.storeId } : {}),
+        };
+
         try {
             setLoading(true);
-            await onSubmit(formData);
+            await onSubmit(submitData);
         } catch (err: any) {
             setError(err.message || '저장에 실패했습니다.');
         } finally {
@@ -83,6 +93,30 @@ export const WorkerForm = ({
                     placeholder="01012345678"
                     disabled={loading}
                 />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    소속 영업장
+                </label>
+                <select
+                    value={formData.storeId || ''}
+                    onChange={(e) =>
+                        setFormData({ ...formData, storeId: e.target.value || undefined })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"
+                    disabled={loading}
+                >
+                    <option value="">전체 영업장 (미지정)</option>
+                    {storeList.map((store) => (
+                        <option key={store.id} value={store.id}>
+                            {store.name}
+                        </option>
+                    ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                    미지정 시 모든 영업장에서 근무 가능합니다.
+                </p>
             </div>
 
             <div className="flex gap-2 justify-end pt-4">

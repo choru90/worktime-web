@@ -4,6 +4,8 @@ export interface Worker {
     name: string;
     phoneNumber: string;
     active: boolean;
+    storeId?: string;
+    storeName?: string;
     currentHourlyWage?: number;
     hasAccount?: boolean;
     userEmail?: string;
@@ -22,6 +24,7 @@ export interface WageContract {
 export interface WorkerCreateRequest {
     name: string;
     phoneNumber: string;
+    storeId?: string;
 }
 
 export interface WorkerUpdateRequest {
