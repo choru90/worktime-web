@@ -13,6 +13,7 @@ export const WorkLogsPage = () => {
     const { user } = useAuth();
     const [searchParams] = useSearchParams();
     const queryDate = searchParams.get('date');
+    const queryStatus = searchParams.get('status');
 
     // 알바생은 /my/worklogs로 리다이렉트
     if (user?.role === 'WORKER') {
@@ -33,20 +34,17 @@ export const WorkLogsPage = () => {
             return {
                 fromDate: queryDate,
                 toDate: queryDate,
-                status: '',
+                status: queryStatus || '',
             };
         }
 
         const today = new Date();
-        const fromDate = new Date(today);
-        fromDate.setDate(today.getDate() - 7);
-        const toDate = new Date(today);
-        toDate.setDate(today.getDate() + 7);
+        const todayString = today.toISOString().split('T')[0];
 
         return {
-            fromDate: fromDate.toISOString().split('T')[0],
-            toDate: toDate.toISOString().split('T')[0],
-            status: 'COMPLETED',
+            fromDate: todayString,
+            toDate: todayString,
+            status: '',
         };
     };
 
@@ -56,8 +54,8 @@ export const WorkLogsPage = () => {
         try {
             setLoading(true);
             const params: any = {
-                from: new Date(filter.fromDate).toISOString(),
-                to: new Date(filter.toDate + 'T23:59:59').toISOString(),
+                from: new Date(filter.fromDate + 'T00:00:00+09:00').toISOString(),
+                to: new Date(filter.toDate + 'T23:59:59+09:00').toISOString(),
             };
 
             if (filter.workerId) {

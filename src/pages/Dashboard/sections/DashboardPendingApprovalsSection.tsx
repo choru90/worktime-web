@@ -106,7 +106,6 @@ export const DashboardPendingApprovalsSection: React.FC<Props> = ({ date }) => {
             ) : (
                 <div className="space-y-4">
                     {actionList.map((actionListItem) => {
-                        const isScheduleApproval = actionListItem.type === 'PENDING_SCHEDULE_APPROVAL';
                         const targetId = actionListItem.target.targetId;
 
                         return (
@@ -116,13 +115,7 @@ export const DashboardPendingApprovalsSection: React.FC<Props> = ({ date }) => {
                             >
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                                            isScheduleApproval
-                                                ? 'bg-blue-100 text-blue-700'
-                                                : actionListItem.type === 'MISSING_CHECKIN'
-                                                ? 'bg-orange-100 text-orange-700'
-                                                : 'bg-red-100 text-red-700'
-                                        }`}>
+                                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
                                             {actionListItem.title}
                                         </span>
                                         <span className="text-xs text-gray-400">
@@ -135,31 +128,20 @@ export const DashboardPendingApprovalsSection: React.FC<Props> = ({ date }) => {
                                     <div className="font-medium text-gray-900">{actionListItem.message}</div>
                                 </div>
                                 <div className="flex gap-2">
-                                    {isScheduleApproval ? (
-                                        <>
-                                            <button
-                                                onClick={() => handleScheduleApprove(targetId)}
-                                                disabled={actionLoading === targetId}
-                                                className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md transition-colors disabled:bg-gray-400"
-                                            >
-                                                {actionLoading === targetId ? '처리중...' : '승인'}
-                                            </button>
-                                            <button
-                                                onClick={() => handleScheduleReject(targetId)}
-                                                disabled={actionLoading === targetId}
-                                                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md transition-colors disabled:bg-gray-400"
-                                            >
-                                                거절
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <button
-                                            onClick={() => navigate(actionListItem.target.deepLink)}
-                                            className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-md transition-colors"
-                                        >
-                                            이동
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => handleScheduleApprove(targetId)}
+                                        disabled={actionLoading === targetId}
+                                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md transition-colors disabled:bg-gray-400"
+                                    >
+                                        {actionLoading === targetId ? '처리중...' : '승인'}
+                                    </button>
+                                    <button
+                                        onClick={() => handleScheduleReject(targetId)}
+                                        disabled={actionLoading === targetId}
+                                        className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md transition-colors disabled:bg-gray-400"
+                                    >
+                                        거절
+                                    </button>
                                 </div>
                             </div>
                         );
