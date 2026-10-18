@@ -1,191 +1,49 @@
 # Worktime Web
 
-아르바이트 관리 서비스(Worktime)의 프론트엔드 애플리케이션입니다.
+소규모 매장의 근무 관리 웹이다. React 18, TypeScript 5, Vite 5, TailwindCSS를 사용하며 JWT로 실제 Worktime API와 통신한다.
 
-## 📋 프로젝트 소개
+## 현재 기능
 
-Worktime Web은 React + TypeScript + Vite 기반으로 구축된 웹 애플리케이션으로, 사장님과 알바생이 효율적으로 근무 스케줄, 출퇴근 기록, 급여를 관리할 수 있는 서비스입니다.
+- 사장/직원 가입·로그인·초대 코드 연결
+- 역할별 대시보드와 서비스 내 알림
+- 매장·고정 근무·직원·시급계약 관리
+- 월/주 캘린더와 일정 요청·승인·거절
+- 직원 근무시간 수동 입력과 관리자 승인·반려
+- 월별 예상 급여와 일별 상세 조회
 
-## 🚀 기술 스택
+대체 근무 요청→후보 수락→관리자 최종 승인은 후속 설계 단계다. 네이티브 앱은 포함하지 않는다.
 
-- **Framework**: React 18.2.0
-- **Language**: TypeScript 5.2.2
-- **Build Tool**: Vite 5.0.8
-- **Routing**: React Router DOM 6.20.0
-- **Styling**: TailwindCSS 3.3.6
-- **Package Manager**: npm
+## 설치·실행·검증
 
-## 📁 프로젝트 구조
-
-```
-worktime-web/
-├── public/                 # 정적 파일
-│   └── vite.svg
-├── src/
-│   ├── app/               # 앱 설정 및 라우팅
-│   │   ├── App.tsx        # 메인 앱 컴포넌트
-│   │   ├── router.tsx     # 라우트 정의
-│   │   ├── PrivateRoute.tsx  # 인증 보호 라우트
-│   │   └── index.css      # 전역 스타일
-│   │
-│   ├── layouts/           # 레이아웃 컴포넌트
-│   │   └── MainLayout.tsx # Header + Sidebar 레이아웃
-│   │
-│   ├── components/        # 공통 컴포넌트
-│   │   └── common/
-│   │       ├── Header.tsx      # 헤더
-│   │       ├── Sidebar.tsx     # 사이드바
-│   │       └── PageContainer.tsx  # 페이지 래퍼
-│   │
-│   ├── pages/             # 페이지 컴포넌트
-│   │   ├── Login/
-│   │   │   └── LoginPage.tsx    # 로그인
-│   │   ├── Dashboard/
-│   │   │   └── DashboardPage.tsx  # 대시보드
-│   │   ├── Workers/
-│   │   │   └── WorkersPage.tsx   # 알바생 관리
-│   │   ├── Schedule/
-│   │   │   └── SchedulePage.tsx  # 스케줄 관리
-│   │   ├── WorkLogs/
-│   │   │   └── WorkLogsPage.tsx  # 근무 기록
-│   │   └── Payroll/
-│   │       └── PayrollPage.tsx   # 급여 관리
-│   │
-│   ├── hooks/             # Custom Hooks
-│   │   └── useAuth.ts     # 인증 훅
-│   │
-│   └── main.tsx           # 엔트리 포인트
-│
-├── index.html             # HTML 템플릿
-├── package.json           # 프로젝트 의존성
-├── vite.config.ts         # Vite 설정
-├── tsconfig.json          # TypeScript 설정
-├── tailwind.config.js     # TailwindCSS 설정
-└── postcss.config.js      # PostCSS 설정
-```
-
-## 🎯 주요 기능
-
-### 현재 구현된 기능 (EPIC 1)
-
-- ✅ 프로젝트 기본 구조 및 설정
-- ✅ 공통 레이아웃 (Header + Sidebar)
-- ✅ 라우팅 설정
-- ✅ Mock 인증 시스템
-- ✅ 6개 페이지 골격
-
-### 페이지 목록
-
-| 경로 | 설명 | 인증 필요 |
-|------|------|----------|
-| `/login` | 로그인 페이지 | ✗ |
-| `/dashboard` | 대시보드 | ✓ |
-| `/workers` | 알바생 관리 | ✓ |
-| `/schedule` | 스케줄 관리 | ✓ |
-| `/worklogs` | 근무 기록 | ✓ |
-| `/payroll` | 급여 관리 | ✓ |
-
-## 🛠️ 설치 및 실행
-
-### 1. 의존성 설치
-
-```bash
-npm install
-```
-
-### 2. 개발 서버 실행
-
-```bash
+```sh
+npm ci
 npm run dev
 ```
 
-서버가 http://localhost:3000 에서 실행됩니다.
+기본 주소는 localhost:3000이다. Vite가 `/api`를 localhost:8080의 백엔드로 프록시한다. 백엔드를 별도로 실행하고 실제 개발 계정을 만든다. 임의 이메일/비밀번호로 로그인되는 Mock 인증이 아니다.
 
-### 3. 프로덕션 빌드
-
-```bash
+```sh
 npm run build
+npm run lint
+node --test scripts/test-api-client.mjs
 ```
 
-빌드된 파일은 `dist/` 폴더에 생성됩니다.
+빌드는 TypeScript strict/미사용 변수 검사와 Vite 번들 생성을 포함한다. ESLint는 기본 JavaScript 오류를 검사하며 TypeScript의 미사용 변수 검사는 tsc가 담당한다. React Hooks 의존성과 기존 explicit any 정리는 후속 강화 대상이다. Node 테스트는 실제 Axios interceptor를 실행해 403/404/500에서 세션 보존, 401에서 정리·로그인 이동을 확인한다. 브라우저 E2E runner는 아직 없다.
 
-### 4. 프로덕션 미리보기
+`npm run preview`는 빌드 산출물을 확인하는 용도다. 운영 API 라우팅은 개발용 Vite 프록시와 별도로 구성해야 한다.
 
-```bash
-npm run preview
-```
+## 주요 경로와 구조
 
-## 🔐 인증 시스템
+`src/app/router.tsx`가 페이지와 역할별 이동을 정의한다. `src/lib/apiClient.ts`가 `/api`와 JWT 헤더를 관리한다. `src/pages`는 대시보드·직원·일정·근무기록·급여·매장 화면, `src/types`는 화면 타입이다.
 
-현재는 Mock 인증을 사용하며, localStorage에 인증 상태를 저장합니다.
+현재 토큰은 localStorage에 보관한다. 권한 제어의 최종 책임은 서버에 있으며 UI 숨김만으로 접근을 제한할 수 없다.
+권한 부족 403은 세션을 유지한 채 호출자에게 전달한다. 401일 때만 저장된 토큰·사용자를 정리하고 로그인 화면으로 이동한다.
 
-**로그인 방법:**
-1. `/login` 페이지에서 이메일과 비밀번호 입력 (임의 값)
-2. 로그인 버튼 클릭
-3. 자동으로 `/dashboard`로 리다이렉트
+## 출시 전 확인 사항
 
-**로그아웃:**
-- Header의 로그아웃 버튼 클릭
+- 다른 도메인까지 포함한 전체 API 권한 검토
+- 모바일 화면, 접근성, 로그인부터 월별 급여까지 브라우저 E2E
+- 의존성 취약점의 영향과 호환 가능한 업그레이드 검토
+- 개발 프록시와 운영 API 라우팅 분리
 
-> **Note:** 실제 백엔드 API 연동은 추후 EPIC에서 구현 예정입니다.
-
-## 🎨 스타일 가이드
-
-### TailwindCSS 색상 테마
-
-- **Primary**: Blue (`bg-blue-600`, `hover:bg-blue-700`)
-- **Sidebar**: Dark Gray (`bg-gray-800`)
-- **Background**: Light Gray (`bg-gray-100`)
-- **Card**: White (`bg-white`)
-
-### 주요 스타일 패턴
-
-- Shadow: `shadow`, `shadow-md`, `shadow-xl`
-- Rounded: `rounded-lg`
-- Padding: `p-4`, `p-6`
-- Transitions: `transition-colors`
-
-## 📦 사용된 주요 라이브러리
-
-| 라이브러리 | 버전 | 용도 |
-|-----------|------|------|
-| react | ^18.2.0 | UI 프레임워크 |
-| react-router-dom | ^6.20.0 | 라우팅 |
-| typescript | ^5.2.2 | 타입 안전성 |
-| vite | ^5.0.8 | 빌드 도구 |
-| tailwindcss | ^3.3.6 | 스타일링 |
-
-## 🚧 향후 계획
-
-- [ ] 실제 백엔드 API 연동
-- [ ] Workers 페이지 테이블 구현
-- [ ] Dashboard 통계 위젯
-- [ ] Schedule CRUD 기능
-- [ ] WorkLogs 기록 기능
-- [ ] Payroll 계산 및 조회
-- [ ] 반응형 디자인 개선
-
-## 📝 개발 가이드
-
-### 새 페이지 추가
-
-1. `src/pages/[PageName]/` 폴더 생성
-2. `[PageName]Page.tsx` 컴포넌트 생성
-3. `src/app/router.tsx`에 라우트 추가
-
-### 새 공통 컴포넌트 추가
-
-1. `src/components/common/` 폴더에 컴포넌트 생성
-2. 필요한 페이지에서 import하여 사용
-
-## 🔗 관련 프로젝트
-
-- **Backend**: [worktime](../worktime) - Spring Boot + Kotlin 백엔드
-
-## 📄 라이선스
-
-MIT
-
-## 👥 개발자
-
-- Backend & Frontend Developer
+백엔드 저장소: `choru90/worktime`.

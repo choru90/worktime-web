@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../lib/apiClient';
 import { Loading } from '../../../components/common/Loading';
 import { ErrorState } from '../../../components/common/ErrorState';
@@ -10,7 +9,6 @@ interface Props {
 }
 
 export const DashboardPendingApprovalsSection: React.FC<Props> = ({ date }) => {
-    const navigate = useNavigate();
     const [actionList, setActionList] = useState<ActionItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

@@ -4,9 +4,7 @@ import { useNotifications } from '../../hooks/useNotifications';
 import { NotificationBadge } from '../Notification/NotificationBadge';
 import { NotificationDropdown } from '../Notification/NotificationDropdown';
 
-interface HeaderProps { }
-
-export const Header = ({ }: HeaderProps) => {
+export const Header = () => {
     const { logout, user } = useAuth();
     const { notifications, unreadCount, markAsRead, markAllAsRead, refresh } = useNotifications();
     const [showNotifications, setShowNotifications] = useState(false);
