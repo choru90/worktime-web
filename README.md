@@ -25,9 +25,10 @@ npm run dev
 ```sh
 npm run build
 npm run lint
+node --test scripts/test-api-client.mjs
 ```
 
-빌드는 TypeScript strict/미사용 변수 검사와 Vite 번들 생성을 포함한다. ESLint는 기본 JavaScript 오류를 검사하며 TypeScript의 미사용 변수 검사는 tsc가 담당한다. React Hooks 의존성과 기존 explicit any 정리는 후속 강화 대상이다. 전용 프런트 테스트/E2E runner는 아직 없다.
+빌드는 TypeScript strict/미사용 변수 검사와 Vite 번들 생성을 포함한다. ESLint는 기본 JavaScript 오류를 검사하며 TypeScript의 미사용 변수 검사는 tsc가 담당한다. React Hooks 의존성과 기존 explicit any 정리는 후속 강화 대상이다. Node 테스트는 실제 Axios interceptor를 실행해 403/404/500에서 세션 보존, 401에서 정리·로그인 이동을 확인한다. 브라우저 E2E runner는 아직 없다.
 
 `npm run preview`는 빌드 산출물을 확인하는 용도다. 운영 API 라우팅은 개발용 Vite 프록시와 별도로 구성해야 한다.
 
@@ -36,10 +37,11 @@ npm run lint
 `src/app/router.tsx`가 페이지와 역할별 이동을 정의한다. `src/lib/apiClient.ts`가 `/api`와 JWT 헤더를 관리한다. `src/pages`는 대시보드·직원·일정·근무기록·급여·매장 화면, `src/types`는 화면 타입이다.
 
 현재 토큰은 localStorage에 보관한다. 권한 제어의 최종 책임은 서버에 있으며 UI 숨김만으로 접근을 제한할 수 없다.
+권한 부족 403은 세션을 유지한 채 호출자에게 전달한다. 401일 때만 저장된 토큰·사용자를 정리하고 로그인 화면으로 이동한다.
 
 ## 출시 전 확인 사항
 
-- 백엔드 소유권 검증과 승인 기록만 급여에 반영하는 정책 보완
+- 다른 도메인까지 포함한 전체 API 권한 검토
 - 모바일 화면, 접근성, 로그인부터 월별 급여까지 브라우저 E2E
 - 의존성 취약점의 영향과 호환 가능한 업그레이드 검토
 - 개발 프록시와 운영 API 라우팅 분리
