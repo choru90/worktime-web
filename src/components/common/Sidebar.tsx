@@ -1,7 +1,5 @@
 import { NavLink } from 'react-router-dom';
 
-interface SidebarProps { }
-
 const menuItems = [
     { path: '/dashboard', label: '대시보드', icon: '📊' },
     { path: '/store/settings', label: '영업장 설정', icon: '🏪' },
@@ -11,7 +9,7 @@ const menuItems = [
     { path: '/payroll', label: '급여 관리', icon: '💰' },
 ];
 
-export const Sidebar = ({ }: SidebarProps) => {
+export const Sidebar = () => {
     return (
         <aside className="w-64 bg-white border-r border-gray-200 min-h-screen">
             {/* 로고 영역 */}
