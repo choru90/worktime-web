@@ -29,6 +29,7 @@ export const authApi = {
     /**
      * Owner 회원가입
      */
+    signUpWorker: (request: { email: string; password: string; inviteCode: string }) => apiClient.post<LoginResponse>('/auth/workers/signup', request),
     signUpOwner: (request: OwnerSignUpRequest) => {
         return apiClient.post<LoginResponse>('/auth/owners/signup', request);
     },
