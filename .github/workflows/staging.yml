@@ -1,0 +1,61 @@
+name: Worktime web CI and staging deployment
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  ci:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: node --test scripts/test-api-client.mjs
+      - run: npm run lint
+      - run: npm run build
+      - name: Build image
+        run: docker build -f deploy/Dockerfile -t worktime-web:${{ github.sha }} .
+      - name: Package deploy image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          SERVICE: web
+        run: |
+          docker save worktime-web:${{ github.sha }} | gzip > image.tar.gz
+          python3 deploy/package.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: web-${{ github.sha }}
+          path: |
+            image.tar.gz
+            metadata.json
+          retention-days: 1
+          if-no-files-found: error
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: staging
+    concurrency:
+      group: staging-web
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: web-${{ github.sha }}
+      - name: Transfer and deploy exact CI artifact
+        env:
+          SERVICE: web
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: bash deploy/upload.sh
