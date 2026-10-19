@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../../api/authApi';
 
 export const SignupPage = () => {
+    const [inviteCode, setInviteCode] = useState('');
+    const [workerSignup, setWorkerSignup] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -22,7 +24,7 @@ export const SignupPage = () => {
             return '올바른 이메일 형식을 입력해주세요.';
         }
 
-        if (!name.trim()) {
+        if (!workerSignup && !name.trim()) {
             return '이름을 입력해주세요.';
         }
 
@@ -50,7 +52,8 @@ export const SignupPage = () => {
         setLoading(true);
 
         try {
-            await authApi.signUpOwner({
+            if (workerSignup) await authApi.signUpWorker({ email, password, inviteCode: inviteCode.trim() });
+            else await authApi.signUpOwner({
                 email,
                 password,
                 name,
@@ -83,7 +86,7 @@ export const SignupPage = () => {
                     Worktime
                 </h1>
                 <p className="mt-2 text-center text-sm text-gray-500">
-                    사장님 계정 만들기
+                    {workerSignup ? '초대받은 직원 계정 만들기' : '사장님 계정 만들기'}
                 </p>
             </div>
 
@@ -96,6 +99,8 @@ export const SignupPage = () => {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        <button type="button" disabled={loading} className="underline" onClick={() => {setWorkerSignup(!workerSignup); setError('');}}>{workerSignup ? '사장님 가입으로 전환' : '초대받은 직원으로 가입'}</button>
+                        {workerSignup && <label className="block">초대 코드<input aria-label="초대 코드" className="block border rounded p-2 w-full" value={inviteCode} onChange={e => setInviteCode(e.target.value)} required disabled={loading} /></label>}
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                                 이메일
@@ -123,8 +128,8 @@ export const SignupPage = () => {
                                 onChange={(e) => setName(e.target.value)}
                                 className="mt-1 block w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
                                 placeholder="홍길동"
-                                required
-                                disabled={loading}
+                                required={!workerSignup}
+                                disabled={loading || workerSignup}
                             />
                         </div>
 
@@ -207,4 +212,3 @@ export const SignupPage = () => {
         </div>
     );
 };
-

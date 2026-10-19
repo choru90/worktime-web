@@ -1,3 +1,4 @@
+import { WorkerPages } from '../pages/Worker/WorkerPages';
 import { createBrowserRouter, Navigate, useLocation } from 'react-router-dom';
 import { LoginPage } from '../pages/Login/LoginPage';
 import { SignupPage } from '../pages/Signup/SignupPage';
@@ -21,6 +22,11 @@ const ScheduleRedirect = () => {
 };
 
 export const router = createBrowserRouter([
+    { path: '/my/worklogs', element: <PrivateRoute><MainLayout><WorkerPages view="worklogs" /></MainLayout></PrivateRoute> },
+    { path: '/my/schedules', element: <PrivateRoute><MainLayout><WorkerPages view="schedules" /></MainLayout></PrivateRoute> },
+    { path: '/my/payroll', element: <PrivateRoute><MainLayout><WorkerPages view="payroll" /></MainLayout></PrivateRoute> },
+    { path: '/payroll/workers/:workerId', element: <PrivateRoute><MainLayout><WorkerPages view="payroll" /></MainLayout></PrivateRoute> },
+
     {
         path: '/',
         element: <Navigate to="/dashboard" replace />,
@@ -130,4 +136,3 @@ export const router = createBrowserRouter([
         ),
     },
 ]);
-

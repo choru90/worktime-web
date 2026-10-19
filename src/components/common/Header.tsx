@@ -44,17 +44,17 @@ export const Header = () => {
     }, [showNotifications, refresh]);
 
     return (
-        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6">
-            <h1 className="text-lg font-semibold text-gray-900">Worktime 사장님용</h1>
+        <header className="bg-white border-b border-gray-200 min-h-16 flex items-center justify-between gap-2 px-3 py-3 sm:px-6">
+            <h1 className="text-lg font-semibold text-gray-900">Worktime {user?.role === 'WORKER' ? '직원용' : '사장님용'}</h1>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                 {user && (
                     <div className="flex items-center gap-3">
-                        <span className="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-full font-medium">
-                            사장님
+                        <span className="hidden sm:block text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-full font-medium">
+                            {user?.role === 'WORKER' ? '직원' : '사장님'}
                         </span>
                         {user.email && (
-                            <span className="text-sm text-gray-600">{user.email}</span>
+                            <span className="hidden lg:block text-sm text-gray-600">{user.email}</span>
                         )}
                     </div>
                 )}
@@ -80,7 +80,7 @@ export const Header = () => {
 
                 <button
                     onClick={handleLogout}
-                    className="bg-gray-900 hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-lg transition-colors"
+                    className="bg-gray-900 hover:bg-gray-800 text-white text-sm whitespace-nowrap px-3 py-2 rounded-lg transition-colors"
                 >
                     로그아웃
                 </button>
@@ -88,4 +88,3 @@ export const Header = () => {
         </header>
     );
 };
-
