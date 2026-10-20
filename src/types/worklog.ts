@@ -9,6 +9,9 @@ export interface WorkLog {
     durationMinutes: number | null;
     createdAt: string;
     updatedAt: string;
+    correctionCount?: number;
+    correctionReason?: string | null;
+    rejectionReason?: string | null;
 }
 
 export interface WorkLogFilter {
@@ -21,3 +24,4 @@ export interface WorkLogFilter {
 export interface RejectRequest {
     reason: string;
 }
+
