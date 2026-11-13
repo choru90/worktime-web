@@ -48,6 +48,14 @@ export const router = createBrowserRouter([
         ),
     },
     {
+        path: '/signup/worker',
+        element: (
+            <PublicRoute>
+                <SignupPage />
+            </PublicRoute>
+        ),
+    },
+    {
         path: '/dashboard',
         element: (
             <PrivateRoute>
