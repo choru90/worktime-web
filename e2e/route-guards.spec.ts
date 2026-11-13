@@ -16,10 +16,10 @@ test('login form requires email and password before submitting', async ({ page }
   const password = page.getByLabel('비밀번호');
   const submit = page.getByRole('button', { name: '로그인', exact: true });
   await submit.click();
-  await expect(email).toHaveJSProperty('validity', expect.objectContaining({ valueMissing: true }));
+  expect(await email.evaluate((input: HTMLInputElement) => input.validity.valueMissing)).toBe(true);
   await expect(page).toHaveURL(/\/login$/);
   await email.fill('synthetic@example.test');
   await submit.click();
-  await expect(password).toHaveJSProperty('validity', expect.objectContaining({ valueMissing: true }));
+  expect(await password.evaluate((input: HTMLInputElement) => input.validity.valueMissing)).toBe(true);
   await expect(page).toHaveURL(/\/login$/);
 });
