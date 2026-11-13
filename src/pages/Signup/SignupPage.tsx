@@ -1,10 +1,10 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useMatch } from 'react-router-dom';
 import { authApi } from '../../api/authApi';
 
 export const SignupPage = () => {
     const [inviteCode, setInviteCode] = useState('');
-    const [workerSignup, setWorkerSignup] = useState(false);
+    const workerSignup = useMatch('/signup/worker') !== null;
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -99,7 +99,7 @@ export const SignupPage = () => {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <button type="button" disabled={loading} className="underline" onClick={() => {setWorkerSignup(!workerSignup); setError('');}}>{workerSignup ? '사장님 가입으로 전환' : '초대받은 직원으로 가입'}</button>
+                        <button type="button" disabled={loading} className="underline" onClick={() => {navigate(workerSignup ? '/signup' : '/signup/worker'); setError('');}}>{workerSignup ? '사장님 가입으로 전환' : '초대받은 직원으로 가입'}</button>
                         {workerSignup && <label className="block">초대 코드<input aria-label="초대 코드" className="block border rounded p-2 w-full" value={inviteCode} onChange={e => setInviteCode(e.target.value)} required disabled={loading} /></label>}
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
