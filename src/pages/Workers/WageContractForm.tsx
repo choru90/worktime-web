@@ -74,6 +74,7 @@ export const WageContractForm = ({
                         placeholder="10000"
                         disabled={loading}
                         min="0"
+                        step="0.01"
                     />
                 </div>
 

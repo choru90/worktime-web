@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PageContainer } from '../../components/common/PageContainer';
 import { PayrollFilterBar } from './PayrollFilterBar';
 import { PayrollSummaryTable } from './PayrollSummaryTable';
@@ -7,6 +7,7 @@ import { PayrollFilter, PayrollSummary } from '../../types/payroll';
 import { Worker } from '../../types/worker';
 
 export const PayrollPage = () => {
+    const payrollRequest = useRef(0);
     const [payrollData, setPayrollData] = useState<PayrollSummary[]>([]);
     const [workers, setWorkers] = useState<Worker[]>([]);
     const [loading, setLoading] = useState(true);
@@ -15,14 +16,15 @@ export const PayrollPage = () => {
     const getInitialFilter = (): PayrollFilter => {
         const today = new Date();
         return {
-            year: today.getFullYear(),
-            month: today.getMonth() + 1,
+            year: today.getUTCFullYear(),
+            month: today.getUTCMonth() + 1,
         };
     };
 
     const [filter, setFilter] = useState<PayrollFilter>(getInitialFilter());
 
     const fetchPayrollData = async () => {
+        const requestId = ++payrollRequest.current;
         try {
             setLoading(true);
             const params: any = {
@@ -39,6 +41,8 @@ export const PayrollPage = () => {
                 { params }
             );
 
+            if (requestId !== payrollRequest.current) return;
+
             // 백엔드 응답을 프론트엔드 형식으로 변환
             const transformedData: PayrollSummary[] = response.data.map((item: any) => ({
                 workerId: item.workerId,
@@ -50,11 +54,12 @@ export const PayrollPage = () => {
 
             setPayrollData(transformedData);
         } catch (error) {
+            if (requestId !== payrollRequest.current) return;
             console.error('Failed to fetch payroll data:', error);
             alert('급여 데이터를 불러오는데 실패했습니다.');
             setPayrollData([]); // 에러 시 빈 배열로 설정
         } finally {
-            setLoading(false);
+            if (requestId === payrollRequest.current) setLoading(false);
         }
     };
 
@@ -73,6 +78,7 @@ export const PayrollPage = () => {
 
     useEffect(() => {
         fetchPayrollData();
+        return () => { payrollRequest.current++; };
     }, [filter]);
 
     return (
@@ -82,6 +88,8 @@ export const PayrollPage = () => {
                     {filter.year}년 {filter.month}월 급여 현황
                 </p>
             </div>
+
+            <p className="mb-4 text-sm text-gray-600">UTC 출근일 기준으로 계산합니다. 월 경계를 넘는 근무는 출근 월에 모두 반영됩니다.</p>
 
             <PayrollFilterBar
                 filter={filter}

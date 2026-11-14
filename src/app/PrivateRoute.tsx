@@ -4,10 +4,11 @@ import { useAuth } from '../hooks/useAuth';
 
 interface PrivateRouteProps {
     children: ReactNode;
+    requiredRole?: 'OWNER' | 'WORKER';
 }
 
-export const PrivateRoute = ({ children }: PrivateRouteProps) => {
-    const { isAuthenticated, loading } = useAuth();
+export const PrivateRoute = ({ children, requiredRole }: PrivateRouteProps) => {
+    const { isAuthenticated, loading, user } = useAuth();
 
     if (loading) {
         return (
@@ -20,6 +21,8 @@ export const PrivateRoute = ({ children }: PrivateRouteProps) => {
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
+
+    if (requiredRole && user?.role !== requiredRole) return <Navigate to="/dashboard" replace />;
 
     return <>{children}</>;
 };
