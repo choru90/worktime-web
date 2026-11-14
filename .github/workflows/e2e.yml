@@ -2,22 +2,53 @@ name: Worktime browser E2E
 on:
   pull_request:
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
-  browser-smoke:
+  browser-e2e:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Checkout reviewed backend dependency (WT-001 remains unmerged)
+        uses: actions/checkout@v4
+        with:
+          repository: choru90/worktime
+          ref: 3568fd41495e47648e8cc2a6c4be4df55a4cbc1a
+          path: backend
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: npm
       - run: npm ci
-      - name: Install isolated test runner
-        run: npm install --no-save --package-lock=false @playwright/test@1.56.1
       - run: npx playwright install --with-deps chromium
-      - name: Browser smoke (API-dependent tests skipped without credentials)
+      - name: Start disposable backend and wait for health
+        run: |
+          cd backend
+          bash ./gradlew e2eServer --no-daemon > ../backend-e2e.log 2>&1 &
+          echo $! > ../backend-e2e.pid
+          cd ..
+          for i in $(seq 1 120); do
+            if curl -fsS http://127.0.0.1:8080/actuator/health; then exit 0; fi
+            if ! kill -0 "$(cat backend-e2e.pid)" 2>/dev/null; then cat backend-e2e.log; exit 1; fi
+            sleep 2
+          done
+          cat backend-e2e.log
+          exit 1
+      - run: npm run build
+      - name: Full browser regression with real local API
         run: npx playwright test
+      - name: Reject absent, omitted, failed, flaky or skipped tests
+        if: always()
+        run: node scripts/audit-e2e.mjs
+      - name: Stop disposable backend
+        if: always()
+        run: |
+          if [ -f backend-e2e.pid ]; then kill "$(cat backend-e2e.pid)" || true; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -25,4 +56,6 @@ jobs:
           path: |
             playwright-report/
             test-results/
-          retention-days: 7
+            backend-e2e.log
+          if-no-files-found: error
+          retention-days: 14
