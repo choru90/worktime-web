@@ -18,7 +18,12 @@ export default defineConfig({
   },
   reporter: [['list'], ['junit', { outputFile: 'test-results/junit.xml' }], ['json', { outputFile: 'test-results/results.json' }], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
   outputDir: 'test-results',
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', testIgnore: '**/mobile.spec.ts', use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', testMatch: /(?:full-flow|compatibility)\.spec\.ts/, use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', testMatch: /(?:full-flow|compatibility)\.spec\.ts/, use: { ...devices['Desktop Safari'] } },
+    { name: 'mobile-chromium', testMatch: '**/mobile.spec.ts', use: { ...devices['Pixel 7'] } },
+  ],
   webServer: {
     command: 'npm run dev -- --host 127.0.0.1',
     url: baseURL,

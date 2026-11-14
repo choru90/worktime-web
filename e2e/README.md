@@ -99,3 +99,44 @@ Month-crossing payroll attribution is still an open rule decision from the
 initial report. No expected policy has been invented and no skipped case hides
 that decision. Merge/deployment/coverage exclusions remain prohibited without
 CEO approval.
+
+## WT-002 concurrent sessions and browser compatibility (second follow-up)
+
+Current matrix: **42 distinct scenarios / 50 executions**: desktop Chromium 40,
+Firefox 4 core flows, WebKit 4 core flows, mobile Chromium 2. The earlier 11/28
+results remain historical records. `npx playwright test` runs the entire matrix;
+`--project=chromium --project=mobile-chromium` runs the local 42-case subset.
+The CI audit requires the full matrix, project counts and core scenarios in each
+alternative browser; a local subset cannot certify full completion.
+
+Added coverage includes two isolated sessions of the same authorized owner racing
+approve/reject (a foreign owner still has no review rights); server-side approval
+committed before the browser loses its response and subsequent retry; logout and
+another account login with an old in-flight response; path/body/store/contract ID
+tampering; account unlink/relink revoking the old session's resource ownership;
+name/blank/reason-length/decimal-wage/time bounds; keyboard and mobile controls.
+
+A new test-classpath-only owner-authorized fixture unlinks one synthetic worker
+account for the relink scenario:
+`POST /api/e2e/fixtures/workers/{id}/unlink-account`. Public application code and
+production JAR do not include either fixture. The workflow pins backend commit
+`e74daa78d3150659edd5cdae5af0762789162f79`.
+
+Name bounds now match the existing DB limit of 100 characters and return 400
+instead of an SQL error. An explicitly supplied rejection reason must contain a
+non-whitespace character; an omitted/null reason retains the existing optional
+API contract. Browser hourly wage input accepts 0.01 increments, matching the
+existing two-decimal DB field. Boundary tests exercise both accepted and rejected
+values and verify unchanged state after failure.
+
+Resignation is a **characterization** while policy is pending: active becomes
+false, owner historical payroll is retained, and the currently linked employee's
+old token still reads historical data. This is not a claim that post-resignation
+write rights/session revocation are approved or fixed. No unapproved policy is
+inferred. Month-crossing attribution remains the earlier open decision.
+
+Some local managed environments lack root access and WebKit/Firefox shared
+libraries. Record that limitation separately; CI installs all three engines with
+system dependencies and must execute every matrix case without skips. Deliberate
+lost-response injection executes the real backend first, then aborts delivery;
+this is distinct from the earlier pre-commit 500/offline tests.
