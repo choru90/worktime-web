@@ -68,7 +68,7 @@ export const router = createBrowserRouter([
     {
         path: '/workers',
         element: (
-            <PrivateRoute>
+            <PrivateRoute requiredRole="OWNER">
                 <MainLayout>
                     <WorkersPage />
                 </MainLayout>
@@ -78,7 +78,7 @@ export const router = createBrowserRouter([
     {
         path: '/workers/:workerId',
         element: (
-            <PrivateRoute>
+            <PrivateRoute requiredRole="OWNER">
                 <MainLayout>
                     <WorkerDetailPage />
                 </MainLayout>
@@ -108,7 +108,7 @@ export const router = createBrowserRouter([
     {
         path: '/payroll',
         element: (
-            <PrivateRoute>
+            <PrivateRoute requiredRole="OWNER">
                 <MainLayout>
                     <PayrollPage />
                 </MainLayout>
@@ -118,7 +118,7 @@ export const router = createBrowserRouter([
     {
         path: '/owner/dashboard',
         element: (
-            <PrivateRoute>
+            <PrivateRoute requiredRole="OWNER">
                 <MainLayout>
                     <DashboardPage />
                 </MainLayout>
@@ -136,7 +136,7 @@ export const router = createBrowserRouter([
     {
         path: '/store/settings',
         element: (
-            <PrivateRoute>
+            <PrivateRoute requiredRole="OWNER">
                 <MainLayout>
                     <StoreSettingsPage />
                 </MainLayout>

@@ -57,3 +57,45 @@ checks. No break/night/overtime/weekly holiday premiums are claimed; these rules
 are not implemented/confirmed. Cross-month payroll attribution remains a reported
 backend decision, not a completed browser scenario. Android and load/recovery
 checks are follow-up work after these web/backend gates.
+
+## WT-002 additional regression (user follow-up)
+
+The current full suite is **28 tests** (17 added to the initial 11); the previous
+11-case results remain historical evidence. `scripts/audit-e2e.mjs` now requires
+28 passing cases and every added scenario, with zero failures/skips/flaky results.
+The workflow pins backend `e76b9b251421a841c21c6c02bc0e0a4610083f2a`.
+
+Added scenarios:
+- Stale owner review after worker correction returns 409, displays the refreshed
+  revision and does not change payroll until a current-revision approval.
+- Owner rejection reason survives reload; corrected resubmission is excluded from
+  pay until browser reapproval.
+- Repeated approval and clock-in/out clicks create one operation/record/pay item.
+- Split shifts at a changed historical contract produce the same independently
+  expected 15002 in owner summary/detail and worker detail.
+- Worker direct visits to owner workers/payroll/store/dashboard pages are blocked
+  before management components mount, preserving login.
+- Reload restores login; logout/back/direct navigation cannot restore it.
+- Used/unknown/expired invitation codes reject signup and retain account isolation.
+- Approval 500, disconnected network and delayed response never report false
+  success; retry commits exactly once. Failed worker creation retains form input.
+- Deliberately reversed real payroll HTTP responses cannot replace the last
+  selected year/month/worker result.
+
+Fault tests intentionally intercept only the selected failed/delayed response;
+all successful business operations use the real local backend. Worker correction
+remains an API step because its UI is absent. Invitation expiry uses an authenticated
+owner-only fixture in **backend src/test**, active solely under `wt002-e2e`:
+`POST /api/e2e/fixtures/workers/{id}/expire-invite`. It expires one synthetic code,
+requires production ownership authorization and is absent from the production
+JAR. No global clock mutation or 24-hour wait is needed.
+
+Regression tests reproduced two UI defects and the PR fixes them: owner-only
+routes previously mounted management pages for workers, and older payroll
+responses overwrote newer filter results. Clock actions also use an immediate
+in-flight guard to reject repeated events before React rerenders.
+
+Month-crossing payroll attribution is still an open rule decision from the
+initial report. No expected policy has been invented and no skipped case hides
+that decision. Merge/deployment/coverage exclusions remain prohibited without
+CEO approval.

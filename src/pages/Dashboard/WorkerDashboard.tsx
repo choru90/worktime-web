@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import apiClient from '../../lib/apiClient';
 import { WorkLog } from '../../types/worklog';
@@ -8,6 +8,7 @@ interface WorkerDashboardProps {
 }
 
 export const WorkerDashboard = ({ workerName }: WorkerDashboardProps) => {
+    const clockPending = useRef(false);
     const [currentWorkLog, setCurrentWorkLog] = useState<WorkLog | null>(null);
     const [recentWorkLogs, setRecentWorkLogs] = useState<WorkLog[]>([]);
     const [loading, setLoading] = useState(true);
@@ -57,6 +58,8 @@ export const WorkerDashboard = ({ workerName }: WorkerDashboardProps) => {
     }, [fetchCurrentWorkLog, fetchRecentWorkLogs]);
 
     const handleClockIn = async () => {
+        if (clockPending.current) return;
+        clockPending.current = true;
         try {
             setClockLoading(true);
             await apiClient.post('/worklogs/my/clock-in');
@@ -67,11 +70,14 @@ export const WorkerDashboard = ({ workerName }: WorkerDashboardProps) => {
             const message = error.response?.data?.message || '출근 처리에 실패했습니다.';
             alert(message);
         } finally {
+            clockPending.current = false;
             setClockLoading(false);
         }
     };
 
     const handleClockOut = async () => {
+        if (clockPending.current) return;
+        clockPending.current = true;
         try {
             setClockLoading(true);
             await apiClient.post('/worklogs/my/clock-out');
@@ -82,6 +88,7 @@ export const WorkerDashboard = ({ workerName }: WorkerDashboardProps) => {
             const message = error.response?.data?.message || '퇴근 처리에 실패했습니다.';
             alert(message);
         } finally {
+            clockPending.current = false;
             setClockLoading(false);
         }
     };

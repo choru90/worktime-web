@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: choru90/worktime
-          ref: 3568fd41495e47648e8cc2a6c4be4df55a4cbc1a
+          ref: e76b9b251421a841c21c6c02bc0e0a4610083f2a
           path: backend
       - uses: actions/setup-java@v4
         with:
