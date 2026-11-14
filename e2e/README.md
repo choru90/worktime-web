@@ -157,9 +157,9 @@ controls hidden; the server is authoritative and checks after worker lock/refres
 The complete core owner→worker→review→payroll flow uses real UI for both worker
 schedule approval and correction. APIs remain fixture setup for targeted tests.
 
-Current browser matrix is **58 executions per DB**: Chromium 47, Firefox 4,
-WebKit 4, mobile Chromium 3 (50 distinct scenarios). CI independently runs H2 and
-MySQL: **116 browser executions total**. Each DB artifact contains its own
+Current browser matrix is **59 executions per DB**: Chromium 48, Firefox 4,
+WebKit 4, mobile Chromium 3 (51 distinct scenarios). CI independently runs H2 and
+MySQL: **118 browser executions total**. Each DB artifact contains its own
 JUnit/JSON/HTML and server log, plus failure trace/screenshot/video. Audit requires
 all cases/projects and DB provenance, without skips/flaky results.
 
@@ -169,8 +169,8 @@ Flyway migrations + Hibernate schema validation through:
 Only that fixed synthetic schema/credential target is supported. Browser global
 setup checks the actual DB product from health; metadata records h2/mysql.
 Default local reproduction remains `e2eServer` (H2) plus `npx playwright test`.
-A local Chromium/mobile subset is 50 executions and is not a full-matrix pass.
-The pinned backend is `bbebfda12e7584e43ea3d64428a2cbdc447a560a`.
+A local Chromium/mobile subset is 51 executions and is not a full-matrix pass.
+The pinned backend is `ea08b173920bf992d110bc8a4b2166f97e0b5eb8`.
 
 New regression cases cover schedule approve/reject, rejected-time resubmission,
 stale correction input retention, failed correction retry/validation, year-end
@@ -178,3 +178,5 @@ UTC month attribution without double pay, inactive worker UI and mobile correcti
 focus/cancel. Backend independently verifies 13 forbidden write routes, retained
 historical reads and owner review, and leap/year/offset monthly amounts across
 three payroll APIs plus dashboard.
+
+An additional regression preserves original subsecond timestamps when a correction does not change the displayed time, avoiding an unintended change in payable minutes.

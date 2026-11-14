@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: choru90/worktime
-          ref: bbebfda12e7584e43ea3d64428a2cbdc447a560a
+          ref: ea08b173920bf992d110bc8a4b2166f97e0b5eb8
           path: backend
       - uses: actions/setup-java@v4
         with:

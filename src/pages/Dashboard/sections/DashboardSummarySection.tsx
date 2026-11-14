@@ -73,6 +73,7 @@ export const DashboardSummarySection: React.FC<Props> = ({ date }) => {
             {/* Card 2: Month Wage */}
             <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
                 <h3 className="text-gray-500 text-sm font-medium mb-2">이번 달 인건비</h3>
+                <p className="mb-2 text-xs text-gray-500">UTC 출근일 기준</p>
                 <div className="flex items-baseline gap-1">
                     <span className="text-2xl font-bold text-gray-900">
                         {month.accruedWage.toLocaleString()}

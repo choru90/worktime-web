@@ -80,7 +80,7 @@ export const WorkerPages = ({ view }: { view: 'worklogs' | 'schedules' | 'payrol
     if (!permitted) return <Navigate to="/dashboard" replace />;
     return <section className="p-4 sm:p-6 space-y-5 min-w-0">
         <h1 className="text-2xl font-semibold">{view === 'worklogs' ? '나의 근무 기록' : view === 'schedules' ? '나의 일정' : '예상 급여 상세'}</h1>
-        <label className="block">조회 월 <input aria-label="조회 월" type="month" className="border rounded p-2" value={month} onChange={e => selectMonth(e.target.value)} /></label>
+        <label className="block">조회 월 (UTC 출근일 기준) <input aria-label="조회 월" type="month" className="border rounded p-2" value={month} onChange={e => selectMonth(e.target.value)} /></label>
         {notice && <p role="status" className="text-green-800">{notice}</p>}
         {user?.role === 'WORKER' && !loading && !active && <p className="rounded bg-gray-100 p-3">퇴사한 직원은 과거 기록과 급여를 조회할 수 있습니다. 근무 기록과 일정 변경은 제한됩니다.</p>}
         {loading && <p role="status">불러오는 중…</p>}
@@ -97,6 +97,6 @@ export const WorkerPages = ({ view }: { view: 'worklogs' | 'schedules' | 'payrol
             {active && s.status === 'PROPOSED_BY_OWNER' && <div className="flex gap-3"><button disabled={action !== null} onClick={() => respond(s.id, 'confirm')} className="bg-gray-900 text-white rounded px-4 py-2">{action === s.id ? '처리 중…' : '일정 승인'}</button><button disabled={action !== null} onClick={() => respond(s.id, 'reject')} className="border rounded px-4 py-2">일정 거절</button></div>}
         </article>)}</div>}
         {editing && <WorkLogCorrectionDialog log={editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); setNotice('정정하여 승인 대기로 제출했습니다.'); setRevision(value => value + 1); }} onConflict={() => setRevision(value => value + 1)} />}
-        {view === 'payroll' && <><p>승인된 기록의 예상 금액입니다. 세금·보험·법정 가산수당 및 실제 지급액은 포함하지 않습니다.</p>{payroll && <><h2 className="text-xl">{payroll.workerName} · {Number(payroll.totalAmount).toLocaleString()}원</h2><WorkerPayrollDailyTable items={payroll.dailyDetails} /></>}</>}
+        {view === 'payroll' && <><p>출근일의 UTC 월에 전체 귀속되는 승인 기록의 예상 금액입니다. 세금·보험·법정 가산수당 및 실제 지급액은 포함하지 않습니다.</p>{payroll && <><h2 className="text-xl">{payroll.workerName} · {Number(payroll.totalAmount).toLocaleString()}원</h2><WorkerPayrollDailyTable items={payroll.dailyDetails} /></>}</>}
     </section>;
 };

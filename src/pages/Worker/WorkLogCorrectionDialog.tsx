@@ -28,7 +28,12 @@ export const WorkLogCorrectionDialog = ({ log, onClose, onSaved, onConflict }: {
     const submit = async (event: FormEvent) => {
         event.preventDefault();
         if (pending.current || stale) return;
-        const from = new Date(start), to = new Date(end);
+        const enteredStart = new Date(start), enteredEnd = new Date(end);
+        // Preserve DB subsecond precision when the displayed time was not changed.
+        const from = enteredStart.getTime() === new Date(localDateTime(log.clockInAt)).getTime()
+            ? new Date(log.clockInAt) : enteredStart;
+        const to = log.clockOutAt && enteredEnd.getTime() === new Date(localDateTime(log.clockOutAt)).getTime()
+            ? new Date(log.clockOutAt) : enteredEnd;
         if (!Number.isFinite(from.getTime()) || !Number.isFinite(to.getTime()) || to <= from) {
             setError('퇴근 시간은 출근 시간 이후여야 합니다.'); return;
         }

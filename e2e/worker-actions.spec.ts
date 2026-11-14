@@ -98,3 +98,17 @@ test('retired employee UI keeps historical payroll but hides clock correction an
   await page.goto('/my/payroll'); await page.getByLabel('조회 월').fill(`${f.year}-06`);
   await expect(page.getByRole('heading', { name: `${f.worker.name} · 5,001원` })).toBeVisible();
 });
+
+test('unchanged correction timestamps retain subsecond precision and do not change payable minutes', async ({ page, request }) => {
+  const f = await fixture(request); await f.wage(); const log = await f.log(`${f.date}T09:00:00.123Z`, 30);
+  const before = await f.saved(log.id); await login(page, f.workerEmail); await page.goto('/my/worklogs'); await page.getByLabel('조회 월').fill(`${f.year}-06`);
+  await page.getByTestId(`worklog-${log.id}`).getByRole('button', { name: '시간 정정', exact: true }).click();
+  await page.getByLabel('정정 사유', { exact: true }).fill('시간 변경 없이 사유 확인');
+  const response = page.waitForResponse(r => r.url().endsWith(`/worklogs/my/${log.id}/corrections`));
+  await page.getByRole('button', { name: '정정 제출', exact: true }).click(); expect((await response).status()).toBe(200);
+  const after = await f.saved(log.id);
+  expect(Date.parse(after.clockInAt)).toBe(Date.parse(before.clockInAt)); expect(Date.parse(after.clockOutAt)).toBe(Date.parse(before.clockOutAt));
+  expect(after.durationMinutes).toBe(30);
+  expect((await request.post(`${api}/work-logs/${log.id}/confirm`, { headers: f.ownerHeaders, data: { expectedCorrectionCount: 1 } })).status()).toBe(200);
+  expect(await f.amount()).toBe(5001);
+});

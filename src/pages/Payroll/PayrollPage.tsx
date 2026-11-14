@@ -89,6 +89,8 @@ export const PayrollPage = () => {
                 </p>
             </div>
 
+            <p className="mb-4 text-sm text-gray-600">UTC 출근일 기준으로 계산합니다. 월 경계를 넘는 근무는 출근 월에 모두 반영됩니다.</p>
+
             <PayrollFilterBar
                 filter={filter}
                 onChange={setFilter}
