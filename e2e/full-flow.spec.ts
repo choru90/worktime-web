@@ -103,7 +103,14 @@ test('owner invites worker, proposes schedule, worker clocks, owner approves and
     const detail = await request.get(detailURL, { headers: await auth(employee) });
     expect(detail.status()).toBe(200);
     expect(await detail.json()).toMatchObject({ totalWorkMinutes: 90, totalAmount: 15002 });
-    await page.goto(`/payroll/workers/${worker.id}?year=${year}&month=${month}`);
+    await page.goto('/payroll');
+    await page.getByRole('combobox').nth(0).selectOption(String(year));
+    await page.getByRole('combobox').nth(1).selectOption(String(month));
+    const payrollRow = page.getByRole('row').filter({ hasText: name });
+    await expect(payrollRow).toContainText('15,002원');
+    await expect(payrollRow).toContainText('1시간 30분');
+    await payrollRow.getByRole('button', { name: '상세보기', exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/payroll/workers/${worker.id}\\?year=${year}&month=${month}$`));
     await expect(page.getByRole('heading', { name: `${name} · 15,002원` })).toBeVisible();
     await employee.goto('/my/payroll');
     await employee.getByLabel('조회 월').fill(`${year}-${String(month).padStart(2, '0')}`);
