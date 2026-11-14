@@ -180,3 +180,13 @@ historical reads and owner review, and leap/year/offset monthly amounts across
 three payroll APIs plus dashboard.
 
 An additional regression preserves original subsecond timestamps when a correction does not change the displayed time, avoiding an unintended change in payable minutes.
+
+## Coverage remediation and approved merge
+
+The user authorized coverage remediation and merging, while deployment and
+coverage exclusions remain unapproved. Main deployment is now an explicit
+workflow_dispatch choice defaulting to false. The functional branch incorporates
+that guard before merging. The pinned backend for final validation is
+`6d208d2b44eb8480e5dd883200d87c2796c64353`, including real business-hours validation
+and replacement fixes plus dead-code/required-lock-contract cleanup. The existing
+59-per-DB matrix is retained; no new load or concurrency campaign is introduced.
