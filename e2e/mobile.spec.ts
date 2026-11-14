@@ -16,3 +16,14 @@ test('mobile owner rejection modal and buttons stay within the viewport and can 
   expect(box).not.toBeNull(); expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.x + box!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
   await button.click(); await expect.poll(async () => (await f.saved(log.id)).status).toBe('REJECTED');
 });
+
+test('mobile correction dialog fits viewport and keyboard escape preserves the record', async ({ page, request }) => {
+  const f = await fixture(request); const log = await f.log(); await login(page, f.workerEmail);
+  await page.goto('/my/worklogs'); await page.getByLabel('조회 월').fill(`${f.year}-06`);
+  const button = page.getByTestId(`worklog-${log.id}`).getByRole('button', { name: '시간 정정', exact: true }); await button.click();
+  const dialog = page.getByRole('dialog'); await expect(dialog).toBeVisible();
+  const box = await dialog.boundingBox(); expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.x + box!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  await expect(page.getByLabel('출근 일시', { exact: true })).toBeFocused();
+  await page.getByLabel('정정 사유', { exact: true }).fill('취소할 입력'); await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0); await expect(button).toBeFocused(); expect((await f.saved(log.id)).correctionCount).toBe(0);
+});

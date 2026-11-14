@@ -113,16 +113,20 @@ test('relinked worker account revokes the previous session ownership without cha
   expect((await payroll.json()).totalAmount).toBe(5001); expect(await f.amount()).toBe(5001);
 });
 
-test('resignation preserves owner history and characterizes existing linked-session reads pending policy', async ({ request }) => {
+test('resignation preserves historical reads and blocks old-session work and schedule writes', async ({ request }) => {
   const f = await fixture(request); await f.wage(); const log = await f.log();
   expect((await request.post(`${api}/work-logs/${log.id}/confirm`, { headers: f.ownerHeaders })).status()).toBe(200);
   const resignation = await request.post(`${api}/workers/${f.worker.id}/resign?resignDate=${f.date}`, { headers: f.ownerHeaders });
   expect(resignation.status()).toBe(200); expect((await resignation.json()).active).toBe(false);
   expect(await f.amount()).toBe(5001);
-  // Current code keeps the account link and permits historical reads. This is a
-  // characterization, not an approval of post-resignation write/session policy.
+  // Approved policy: historical reads survive; employee writes are blocked.
   const current = await request.get(`${api}/workers/my`, { headers: f.employeeHeaders });
   expect(current.status()).toBe(200); expect(await current.json()).toMatchObject({ id: f.worker.id, active: false });
   const historical = await request.get(`${api}/payroll/workers/${f.worker.id}/monthly?year=${f.year}&month=6`, { headers: f.employeeHeaders });
   expect(historical.status()).toBe(200); expect((await historical.json()).totalAmount).toBe(5001);
+  expect((await request.post(`${api}/worklogs/my/clock-in`, { headers: f.employeeHeaders })).status()).toBe(403);
+  expect((await request.post(`${api}/worklogs/my/clock-out`, { headers: f.employeeHeaders })).status()).toBe(403);
+  expect((await request.post(`${api}/worklogs/my/${log.id}/corrections`, { headers: f.employeeHeaders, data: { clockInAt: f.start, clockOutAt: `${f.date}T10:30:00Z`, reason: 'inactive edit', expectedStatus: 'CONFIRMED', expectedCorrectionCount: 0 } })).status()).toBe(403);
+  expect((await request.post(`${api}/workers/${f.worker.id}/schedules`, { headers: f.employeeHeaders, data: { workerId: f.worker.id, startAtUtc: f.start, endAtUtc: `${f.date}T10:00:00Z`, timezone: 'UTC', requestType: 'WORKER_REQUEST' } })).status()).toBe(403);
+  expect(await f.amount()).toBe(5001);
 });

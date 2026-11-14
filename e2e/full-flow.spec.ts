@@ -68,11 +68,11 @@ test('owner invites worker, proposes schedule, worker clocks, owner approves and
     await page.getByRole('button', { name: '스케줄 제안', exact: true }).click();
     const proposal = await proposed; expect(proposal.status()).toBe(201);
     const schedule = await proposal.json();
-    // /my/schedules currently has no approval control. Exercise the real API explicitly.
-    const approved = await request.post(`${apiURL}/api/worker/schedules/${schedule.id}/confirm`, { headers: await auth(employee) });
-    expect(approved.status()).toBe(200);
     await employee.goto('/my/schedules');
-    await expect(employee.getByText('CONFIRMED', { exact: true })).toBeVisible();
+    const approved = employee.waitForResponse(r => r.url().endsWith(`/worker/schedules/${schedule.id}/confirm`));
+    await employee.getByTestId(`schedule-${schedule.id}`).getByRole('button', { name: '일정 승인', exact: true }).click();
+    expect((await approved).status()).toBe(200);
+    await expect(employee.getByTestId(`schedule-${schedule.id}`)).toContainText('CONFIRMED');
     await employee.goto('/dashboard');
     const clocked = employee.waitForResponse(r => r.url().endsWith('/worklogs/my/clock-in'));
     await employee.getByRole('button', { name: /출근하기/ }).click();
@@ -81,15 +81,19 @@ test('owner invites worker, proposes schedule, worker clocks, owner approves and
     const checkout = employee.waitForResponse(r => r.url().endsWith('/worklogs/my/clock-out'));
     await employee.getByRole('button', { name: /퇴근하기/ }).click();
     expect((await checkout).status()).toBe(200);
-    // Avoid real waiting: real correction API supplies a completed 90 minute record in the past.
+    // Avoid real waiting: the correction UI supplies a completed 90 minute record in the past.
     const now = new Date();
     const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 15, 12));
     const start = new Date(end.getTime() - 90 * 60000);
-    const correction = await request.post(`${apiURL}/api/worklogs/my/${log.id}/corrections`, {
-      headers: await auth(employee), data: { clockInAt: start.toISOString(), clockOutAt: end.toISOString(),
-        reason: 'WT002 synthetic duration', expectedCorrectionCount: 0, expectedStatus: 'COMPLETED' },
-    });
-    expect(correction.status()).toBe(200);
+    await employee.goto('/my/worklogs');
+    await employee.getByTestId(`worklog-${log.id}`).getByRole('button', { name: '시간 정정', exact: true }).click();
+    const localInput = (date: Date) => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(date).replace(' ', 'T').replace(/:00$/, '');
+    await employee.getByLabel('출근 일시', { exact: true }).fill(localInput(start));
+    await employee.getByLabel('퇴근 일시', { exact: true }).fill(localInput(end));
+    await employee.getByLabel('정정 사유', { exact: true }).fill('WT002 synthetic duration');
+    const correction = employee.waitForResponse(r => r.url().endsWith(`/worklogs/my/${log.id}/corrections`));
+    await employee.getByRole('button', { name: '정정 제출', exact: true }).click();
+    expect((await correction).status()).toBe(200);
     const year = start.getUTCFullYear(), month = start.getUTCMonth() + 1;
     const detailURL = `${apiURL}/api/payroll/workers/${worker.id}/monthly?year=${year}&month=${month}`;
     expect((await (await request.get(detailURL, { headers: await auth(employee) })).json()).totalAmount).toBe(0);

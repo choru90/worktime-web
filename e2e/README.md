@@ -140,3 +140,41 @@ libraries. Record that limitation separately; CI installs all three engines with
 system dependencies and must execute every matrix case without skips. Deliberate
 lost-response injection executes the real backend first, then aborts delivery;
 this is distinct from the earlier pre-commit 500/offline tests.
+
+## Approved UTC payroll/retirement policies and completed worker actions
+
+The user selected full attribution to the **UTC clock-in month** and historical
+read access with **no employee work/correction/schedule mutations after retirement**.
+Those previously open decisions are now resolved. Existing reports remain a
+history of what was measured at each commit, not the current implementation.
+
+Worker `/my/schedules` now approves/rejects proposed schedules. `/my/worklogs`
+shows rejection/correction reasons and provides time correction/resubmission with
+revision/status checks, immediate duplicate guard, retained input on error,
+stale-revision lockout, keyboard focus/escape and mobile layout. Selected months
+are preserved in the URL. Inactive workers see historical views with mutation
+controls hidden; the server is authoritative and checks after worker lock/refresh.
+The complete core owner→worker→review→payroll flow uses real UI for both worker
+schedule approval and correction. APIs remain fixture setup for targeted tests.
+
+Current browser matrix is **58 executions per DB**: Chromium 47, Firefox 4,
+WebKit 4, mobile Chromium 3 (50 distinct scenarios). CI independently runs H2 and
+MySQL: **116 browser executions total**. Each DB artifact contains its own
+JUnit/JSON/HTML and server log, plus failure trace/screenshot/video. Audit requires
+all cases/projects and DB provenance, without skips/flaky results.
+
+The MySQL job provisions a disposable service on loopback 13308 and runs real
+Flyway migrations + Hibernate schema validation through:
+`bash ./gradlew e2eServer -PwtE2eDatabase=mysql --no-daemon`.
+Only that fixed synthetic schema/credential target is supported. Browser global
+setup checks the actual DB product from health; metadata records h2/mysql.
+Default local reproduction remains `e2eServer` (H2) plus `npx playwright test`.
+A local Chromium/mobile subset is 50 executions and is not a full-matrix pass.
+The pinned backend is `bbebfda12e7584e43ea3d64428a2cbdc447a560a`.
+
+New regression cases cover schedule approve/reject, rejected-time resubmission,
+stale correction input retention, failed correction retry/validation, year-end
+UTC month attribution without double pay, inactive worker UI and mobile correction
+focus/cancel. Backend independently verifies 13 forbidden write routes, retained
+historical reads and owner review, and leap/year/offset monthly amounts across
+three payroll APIs plus dashboard.

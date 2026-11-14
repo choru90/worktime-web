@@ -16,8 +16,8 @@ export const PayrollPage = () => {
     const getInitialFilter = (): PayrollFilter => {
         const today = new Date();
         return {
-            year: today.getFullYear(),
-            month: today.getMonth() + 1,
+            year: today.getUTCFullYear(),
+            month: today.getUTCMonth() + 1,
         };
     };
 

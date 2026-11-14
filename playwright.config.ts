@@ -4,6 +4,8 @@ const baseURL = 'http://127.0.0.1:3000';
 if (process.env.WT_E2E_BASE_URL) throw new Error('WT-002 fixtures require the disposable loopback server');
 export default defineConfig({
   testDir: './e2e',
+  globalSetup: './e2e/helpers/global-setup.ts',
+  metadata: { database: process.env.WT_E2E_DATABASE ?? 'h2' },
   timeout: 60_000,
   retries: 0,
   forbidOnly: !!process.env.CI,

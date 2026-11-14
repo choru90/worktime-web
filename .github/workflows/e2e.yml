@@ -7,14 +7,33 @@ permissions:
 jobs:
   browser-e2e:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [h2, mysql]
+    services:
+      mysql:
+        image: mysql:8.0@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b
+        env:
+          MYSQL_DATABASE: worktime_browser_e2e
+          MYSQL_USER: worktime_e2e
+          MYSQL_PASSWORD: synthetic-e2e-password
+          MYSQL_ROOT_PASSWORD: synthetic-e2e-root-password
+        ports:
+          - 13308:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=5s --health-timeout=3s --health-retries=30
+    env:
+      WT_E2E_DATABASE: ${{ matrix.database }}
     steps:
       - uses: actions/checkout@v4
       - name: Checkout reviewed backend dependency (WT-001 remains unmerged)
         uses: actions/checkout@v4
         with:
           repository: choru90/worktime
-          ref: e74daa78d3150659edd5cdae5af0762789162f79
+          ref: bbebfda12e7584e43ea3d64428a2cbdc447a560a
           path: backend
       - uses: actions/setup-java@v4
         with:
@@ -29,7 +48,7 @@ jobs:
       - name: Start disposable backend and wait for health
         run: |
           cd backend
-          bash ./gradlew e2eServer --no-daemon > ../backend-e2e.log 2>&1 &
+          bash ./gradlew e2eServer -PwtE2eDatabase=${{ matrix.database }} --no-daemon > ../backend-e2e.log 2>&1 &
           echo $! > ../backend-e2e.pid
           cd ..
           for i in $(seq 1 120); do
@@ -52,7 +71,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-evidence
+          name: playwright-evidence-${{ matrix.database }}
           path: |
             playwright-report/
             test-results/

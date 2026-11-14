@@ -12,7 +12,7 @@ export const PayrollFilterBar = ({
     onChange,
     workers,
 }: PayrollFilterBarProps) => {
-    const currentYear = new Date().getFullYear();
+    const currentYear = new Date().getUTCFullYear();
     const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
