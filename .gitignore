@@ -25,3 +25,6 @@ dist-ssr
 
 playwright-report/
 test-results/
+
+# Independent read-only staging smoke evidence
+staging-smoke-results/
