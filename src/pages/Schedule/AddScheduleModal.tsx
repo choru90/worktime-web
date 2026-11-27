@@ -50,9 +50,7 @@ export const AddScheduleModal = ({ date, workers, onClose, onCreated }: AddSched
                 endAtUtc,
                 timezone: 'Asia/Seoul',
                 requestType: 'OWNER_PROPOSAL',
-                // memo 필드는 ScheduleCreateRequest에 없음 -> 삭제하거나 별도 처리 필요. 
-                // ScheduleCreateRequest.kt를 보니 memo 필드가 없음. 백엔드에서 안 받으면 보내도 무시되거나 에러?
-                // 백엔드 DTO(ScheduleCreateRequest)에 memo가 없으므로 보내지 않음.
+                ...(memo ? { memo } : {}),
             });
             onCreated();
         } catch (error: any) {
@@ -140,6 +138,7 @@ export const AddScheduleModal = ({ date, workers, onClose, onCreated }: AddSched
                             메모 (선택)
                         </label>
                         <textarea
+                            maxLength={500}
                             value={memo}
                             onChange={(e) => setMemo(e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"

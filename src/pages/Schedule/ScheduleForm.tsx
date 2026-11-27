@@ -63,7 +63,8 @@ export const ScheduleForm = ({
                 startAtUtc: startAtUtc,
                 endAtUtc: endAtUtc,
                 timezone: 'Asia/Seoul',
-                requestType: 'OWNER_PROPOSAL'
+                requestType: 'OWNER_PROPOSAL',
+                ...(formData.memo ? { memo: formData.memo } : {}),
             };
 
             await apiClient.post(`/workers/${formData.workerId}/schedules`, requestBody);
@@ -179,6 +180,7 @@ export const ScheduleForm = ({
                     메모
                 </label>
                 <textarea
+                    maxLength={500}
                     value={formData.memo}
                     onChange={(e) => setFormData({ ...formData, memo: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none"

@@ -29,11 +29,11 @@ jobs:
       WT_E2E_DATABASE: ${{ matrix.database }}
     steps:
       - uses: actions/checkout@v4
-      - name: Checkout reviewed backend dependency (WT-001 remains unmerged)
+      - name: Checkout memo-compatible backend dependency (deploy backend first)
         uses: actions/checkout@v4
         with:
           repository: choru90/worktime
-          ref: 6d208d2b44eb8480e5dd883200d87c2796c64353
+          ref: f132003e86cb6a2a6201ee58546f5855f43170d6
           path: backend
       - uses: actions/setup-java@v4
         with:
@@ -59,6 +59,8 @@ jobs:
           cat backend-e2e.log
           exit 1
       - run: npm run build
+      - name: Form request and client contract regression
+        run: node --test scripts/test-*.mjs
       - name: Full browser regression with real local API
         run: npx playwright test
       - name: Reject absent, omitted, failed, flaky or skipped tests
